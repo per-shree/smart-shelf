@@ -11,6 +11,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Safety check for missing environment variables
+if (!firebaseConfig.apiKey) {
+  console.error("Firebase API Key is missing! Make sure to set VITE_FIREBASE_API_KEY in your environment variables.");
+}
+
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID);
+export const db = getFirestore(app, import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || '(default)');
 export const auth = getAuth(app);
