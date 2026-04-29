@@ -90,7 +90,7 @@ export default function AIAssistant() {
           </button>
         </div>
 
-        {response && (
+        {(loading || response) && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -99,16 +99,28 @@ export default function AIAssistant() {
             <div className="prose prose-sm max-w-none prose-neutral">
               <div className="flex items-center gap-3 text-[var(--color-primary)] font-black text-xs uppercase tracking-widest mb-6">
                 <div className="p-2 bg-[var(--color-card-bg)] rounded-lg shadow-xs"><Bot size={18} /></div>
-                <span>Arctic AI Assistant</span>
+                <span>Smart Shelf AI</span>
               </div>
-              <div className="text-[var(--color-text-main)] leading-relaxed whitespace-pre-wrap font-medium">
-                {response}
-              </div>
+              
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-[var(--color-primary)]/20 border-t-[var(--color-primary)] rounded-full animate-spin" />
+                    <Bot className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--color-primary)]" size={20} />
+                  </div>
+                  <p className="text-xs font-bold text-[var(--color-text-muted)] animate-pulse tracking-widest uppercase">Thinking...</p>
+                </div>
+              ) : (
+                <div className="text-[var(--color-text-main)] leading-relaxed whitespace-pre-wrap font-medium">
+                  {response}
+                </div>
+              )}
             </div>
             {/* Speech bubble arrow */}
             <div className="absolute bottom-0 left-10 w-6 h-6 bg-[var(--color-background-base)] rotate-45 translate-y-3 border-r border-b border-[var(--color-border-subtle)]" />
           </motion.div>
         )}
+
       </div>
 
     </div>

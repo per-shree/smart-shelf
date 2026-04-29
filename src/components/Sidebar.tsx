@@ -10,7 +10,7 @@ import {
   Users, 
   Settings, 
   LogOut,
-  Refrigerator
+  Grid3X3
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -38,9 +38,9 @@ export default function Sidebar() {
       <div className="p-8 flex flex-col mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#5A5A40]/20">
-            <Refrigerator size={24} />
+            <Grid3X3 size={24} />
           </div>
-          <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">ArcticLink</span>
+          <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">Smart Shelf</span>
         </div>
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] mt-2 font-bold ml-1">SMART MANAGEMENT</p>
       </div>

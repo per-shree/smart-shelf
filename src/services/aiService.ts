@@ -9,8 +9,8 @@ export async function getAIResponse(promptString: string, inventory: any[]) {
     ).join('\n');
 
     const fullPrompt = `
-      You are a Smart Refrigerator Management Assistant. 
-      You help users manage their food, suggest recipes, and reduce waste.
+      You are a Smart Shelf Management Assistant. 
+      You help users manage their items, suggest recipes, and reduce waste.
       
       Current Inventory:
       ${inventoryContext}
