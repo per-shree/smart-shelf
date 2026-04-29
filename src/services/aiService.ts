@@ -18,7 +18,9 @@ export async function getAIResponse(promptString: string, inventory: any[]) {
       User Question/Request:
       ${promptString}
       
-      Provide a helpful, concise, and professional response in markdown format. 
+      Provide a helpful, concise, and professional response in plain text only. 
+      IMPORTANT: Do not use any markdown formatting like asterisks (**), hashes (##), or bullet points (*). 
+      Use simple newlines for structure and stay very clean.
       If suggesting recipes, use the available ingredients first.
     `;
 

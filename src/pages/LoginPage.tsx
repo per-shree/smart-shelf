@@ -53,7 +53,7 @@ export default function LoginPage() {
             onClick={() => setIsRegister(false)}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-              !isRegister ? "bg-white text-[var(--color-primary)] shadow-sm" : "text-[var(--color-text-muted)]"
+              !isRegister ? "bg-[var(--color-card-bg)] text-[var(--color-primary)] shadow-sm" : "text-[var(--color-text-muted)]"
             )}
           >
             {t('join_fridge')}
@@ -65,7 +65,7 @@ export default function LoginPage() {
             }}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-              isRegister ? "bg-white text-[var(--color-primary)] shadow-sm" : "text-[var(--color-text-muted)]"
+              isRegister ? "bg-[var(--color-card-bg)] text-[var(--color-primary)] shadow-sm" : "text-[var(--color-text-muted)]"
             )}
           >
             {t('create_new')}
@@ -95,7 +95,7 @@ export default function LoginPage() {
                   className={`py-3 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest border transition-all ${
                     role === Role.Admin 
                       ? 'bg-[var(--color-primary)] text-white border-none shadow-md shadow-[#5A5A40]/20' 
-                      : 'bg-white text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]'
+                      : 'bg-[var(--color-card-bg)] text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]'
                   }`}
                 >
                   {t('admin')}
@@ -106,7 +106,7 @@ export default function LoginPage() {
                   className={`py-3 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest border transition-all ${
                     role === Role.Member 
                       ? 'bg-[var(--color-primary)] text-white border-none shadow-md shadow-[#5A5A40]/20' 
-                      : 'bg-white text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]'
+                      : 'bg-[var(--color-card-bg)] text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]'
                   }`}
                 >
                   {t('member')}
@@ -123,7 +123,7 @@ export default function LoginPage() {
                 placeholder={isRegister ? t('username') : t('username')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-white font-medium text-sm shadow-xs"
+                className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
                 required
               />
             </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 placeholder={isRegister ? t('password') : t('password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-white font-medium text-sm shadow-xs"
+                className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
                 required
               />
             </div>

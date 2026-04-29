@@ -133,7 +133,7 @@ export default function ShoppingList() {
         <button 
           onClick={autoSync}
           disabled={isSyncing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
         >
           {isSyncing ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}
           {t('sync_fridge')}
@@ -146,7 +146,7 @@ export default function ShoppingList() {
           placeholder={t('add_manually')}
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
-          className="flex-1 px-4 py-3 border border-zinc-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="flex-1 px-4 py-3 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
         />
         <button 
           type="submit"
@@ -156,7 +156,7 @@ export default function ShoppingList() {
         </button>
       </form>
 
-      <div className="bg-white rounded-3xl border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+      <div className="bg-[var(--color-card-bg)] rounded-3xl border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
         <ul className="divide-y divide-[var(--color-background-base)]">
           <AnimatePresence>
             {items.sort((a, b) => Number(a.isPurchased) - Number(b.isPurchased)).map((item) => (
@@ -167,7 +167,7 @@ export default function ShoppingList() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className={cn(
                   "p-5 flex items-center justify-between group transition-all",
-                  item.isPurchased ? "bg-[var(--color-background-base)]/50" : "bg-white"
+                  item.isPurchased ? "bg-[var(--color-background-base)]/50" : "bg-[var(--color-card-bg)]"
                 )}
               >
                 <div className="flex items-center gap-5">

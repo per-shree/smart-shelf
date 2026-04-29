@@ -61,7 +61,7 @@ export default function MemberManagement() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-6 rounded-[2rem] border border-[var(--color-border-subtle)] shadow-xs"
+          className="bg-[var(--color-card-bg)] p-6 rounded-[2rem] border border-[var(--color-border-subtle)] shadow-xs"
         >
           <form onSubmit={handleAddMember} className="flex gap-4">
             <div className="relative flex-1">
@@ -71,7 +71,7 @@ export default function MemberManagement() {
                 placeholder={t('new_member_placeholder')}
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
-                className="w-full pl-12 pr-6 py-3.5 border border-[var(--color-border-subtle)] rounded-2xl bg-white focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full pl-12 pr-6 py-3.5 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
               />
             </div>
             <button 
@@ -90,7 +90,7 @@ export default function MemberManagement() {
         {members.map((m) => (
           <div 
             key={m.id}
-            className="p-6 bg-white rounded-3xl border border-[var(--color-border-subtle)] shadow-xs flex items-center justify-between group hover:shadow-md transition-all"
+            className="p-6 bg-[var(--color-card-bg)] rounded-3xl border border-[var(--color-border-subtle)] shadow-xs flex items-center justify-between group hover:shadow-md transition-all"
           >
             <div className="flex items-center gap-5">
               <div className={cn(
@@ -104,7 +104,7 @@ export default function MemberManagement() {
                 <div className="flex items-center gap-3 mt-1.5 text-[10px]">
                   <span className={cn(
                     "px-2.5 py-1 rounded-full font-black uppercase tracking-widest",
-                    m.role === Role.Admin ? "bg-[#FFF3E0] text-[#E65100]" : "bg-[var(--color-background-base)] text-[var(--color-text-muted)]"
+                    m.role === Role.Admin ? "bg-[#FFF3E0] dark:bg-[#402000] text-[#E65100] dark:text-[#FFCC80]" : "bg-[var(--color-background-base)] text-[var(--color-text-muted)]"
                   )}>
                     {m.role === Role.Admin ? t('admin') : t('member')}
                   </span>

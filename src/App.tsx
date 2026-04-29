@@ -20,6 +20,16 @@ export default function App() {
     i18n.changeLanguage(language);
   }, [language, i18n]);
 
+  useEffect(() => {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+
   return (
     <Routes>
       <Route path="/language" element={<LanguagePage />} />

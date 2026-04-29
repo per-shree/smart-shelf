@@ -72,13 +72,13 @@ export default function Dashboard() {
             <input 
               type="text" 
               placeholder={t('search_products')}
-              className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full pl-10 pr-4 py-2 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <select 
-            className="px-4 py-2 border border-zinc-200 rounded-xl bg-white text-sm font-medium focus:outline-none"
+            className="px-4 py-2 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] text-sm font-medium focus:outline-none"
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
           >
@@ -90,7 +90,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+      <div className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
         <div className="p-6 border-b border-[var(--color-background-base)] flex justify-between items-center">
           <h3 className="font-bold text-lg font-display text-[var(--color-text-main)]">{t('current_inventory')}</h3>
           <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function Dashboard() {
                 <th className="px-8 py-4 font-bold text-right">{t('actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F5F2ED] text-sm">
+            <tbody className="divide-y divide-[var(--color-border-subtle)]/30 text-sm">
               <AnimatePresence>
                 {filteredProducts.map((p) => {
                   const status = getStatus(p.expiryDate);
@@ -121,7 +121,7 @@ export default function Dashboard() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="group hover:bg-[#FBFBFA] transition-colors table-row"
+                      className="group hover:bg-[var(--color-background-base)] transition-colors table-row"
                     >
                       <td className="px-8 py-5">
                         <p className="font-bold text-[var(--color-text-main)]">{p.name}</p>
@@ -141,9 +141,9 @@ export default function Dashboard() {
                       <td className="px-8 py-5">
                         <span className={cn(
                           "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
-                          status === 'fresh' && "bg-[#E8F5E9] text-[#2E7D32]",
-                          status === 'near_expiry' && "bg-[#FFF3E0] text-[#E65100]",
-                          status === 'expired' && "bg-[#FFEBEE] text-[#C62828]",
+                          status === 'fresh' && "bg-[#E8F5E9] dark:bg-[#1B2E1D] text-[#2E7D32] dark:text-[#81C784]",
+                          status === 'near_expiry' && "bg-[#FFF3E0] dark:bg-[#3E2723] text-[#E65100] dark:text-[#FFB74D]",
+                          status === 'expired' && "bg-[#FFEBEE] dark:bg-[#3D1A1A] text-[#C62828] dark:text-[#E57373]",
                         )}>
                           {t(status)}
                         </span>

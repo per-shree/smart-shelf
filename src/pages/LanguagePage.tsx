@@ -36,7 +36,8 @@ export default function LanguagePage() {
             <button
               key={lang.code}
               onClick={() => handleSelect(lang.code)}
-              className="w-full py-5 px-8 text-left rounded-2xl border border-[var(--color-border-subtle)] bg-white hover:border-[var(--color-primary)] hover:bg-[var(--color-background-base)] transition-all font-bold text-[var(--color-text-main)] flex justify-between items-center group shadow-xs"
+              className="w-full py-5 px-8 text-left rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-card-bg)] hover:border-[var(--color-primary)] hover:bg-[var(--color-background-base)] transition-all font-bold text-[var(--color-text-main)] flex justify-between items-center group shadow-xs"
+
             >
               <span>{lang.name}</span>
               <div className="w-6 h-6 rounded-full border-2 border-[var(--color-border-subtle)] group-hover:border-[var(--color-primary)] group-hover:bg-[var(--color-primary)] transition-all" />

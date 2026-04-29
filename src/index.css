@@ -8,6 +8,7 @@
   
   --color-primary: #5A5A40;
   --color-background-base: #F8F7F4;
+  --color-card-bg: #FFFFFF;
   --color-border-subtle: #E5E2DA;
   --color-text-main: #353535;
   --color-text-muted: #6B6861;
@@ -18,21 +19,35 @@
 }
 
 @layer base {
-  body {
-    @apply bg-[var(--color-background-base)] text-[var(--color-text-main)] font-sans antialiased;
+  .dark {
+    --color-background-base: #121210;
+    --color-card-bg: #1C1C18;
+    --color-border-subtle: #2D2D26;
+    --color-text-main: #E5E2DA;
+    --color-text-muted: #A19E95;
+    --color-primary: #8C8C64;
   }
+}
+
+
+@layer base {
+  body {
+    @apply bg-[var(--color-background-base)] text-[var(--color-text-main)] font-sans antialiased transition-colors duration-500;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
   }
 }
 
 .glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/40;
+  @apply bg-[var(--color-card-bg)]/70 backdrop-blur-md border border-white/10;
 }
 
 .card-natural {
-  @apply bg-white rounded-3xl border border-[var(--color-border-subtle)] shadow-xs transition-all duration-300 hover:shadow-md;
+  @apply bg-[var(--color-card-bg)] rounded-3xl border border-[var(--color-border-subtle)] shadow-xs transition-all duration-300 hover:shadow-md;
 }
+
 
 .btn-primary {
   @apply bg-[var(--color-primary)] text-white font-bold py-3 px-6 rounded-2xl transition-all hover:opacity-90 shadow-lg shadow-[#5A5A40]/20;

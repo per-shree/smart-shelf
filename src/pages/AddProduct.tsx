@@ -63,7 +63,7 @@ export default function AddProduct() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-10 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs"
+        className="bg-[var(--color-card-bg)] p-10 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs"
       >
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -74,7 +74,7 @@ export default function AddProduct() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
                 placeholder="e.g. Milk, Apple"
               />
             </div>
@@ -83,7 +83,7 @@ export default function AddProduct() {
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-white focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
               >
                 {CATEGORIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
               </select>
@@ -95,7 +95,7 @@ export default function AddProduct() {
                 required
                 value={formData.expiryDate}
                 onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
               />
             </div>
             <div className="space-y-3">
@@ -106,7 +106,7 @@ export default function AddProduct() {
                 min="1"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
-                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full px-5 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
               />
             </div>
           </div>

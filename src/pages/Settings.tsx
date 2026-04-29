@@ -59,9 +59,11 @@ export default function Settings() {
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
+    localStorage.setItem('darkMode', String(newMode));
     if (newMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
   };
+
 
   const handleUpdateProfile = async () => {
     if (!editUsername.trim() || editUsername === user?.username) {
@@ -110,7 +112,7 @@ export default function Settings() {
           <h2 className="text-3xl font-black font-display text-[var(--color-text-main)] tracking-tight">{t('settings')}</h2>
           <p className="text-[var(--color-text-muted)] mt-2 font-medium">Control your experience and manage household data.</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
+        <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-card-bg)] rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
           <ShieldCheck size={16} className="text-green-500" />
           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">{t('secure_session')}</span>
         </div>
@@ -121,7 +123,7 @@ export default function Settings() {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Profile Section */}
-          <section className="bg-white rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+          <section className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
             <div className="p-8 space-y-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -152,7 +154,7 @@ export default function Settings() {
                         type="text" 
                         value={editUsername} 
                         onChange={(e) => setEditUsername(e.target.value)}
-                        className="text-sm font-bold text-[var(--color-text-main)] bg-white border border-[var(--color-border-subtle)] rounded-xl px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                        className="text-sm font-bold text-[var(--color-text-main)] bg-[var(--color-card-bg)] border border-[var(--color-border-subtle)] rounded-xl px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
                       />
                       <button onClick={handleUpdateProfile} className="p-2 bg-green-500 text-white rounded-xl shadow-md shadow-green-500/20"><Check size={18} /></button>
                       <button onClick={() => setIsEditingProfile(false)} className="p-2 bg-red-500 text-white rounded-xl shadow-md shadow-red-500/20"><X size={18} /></button>
@@ -166,7 +168,7 @@ export default function Settings() {
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest",
-                      user?.role === 'Admin' ? "bg-[#FFF3E0] text-[#E65100]" : "bg-white text-[var(--color-text-muted)]"
+                      user?.role === 'Admin' ? "bg-[#FFF3E0] dark:bg-[#402000] text-[#E65100] dark:text-[#FFCC80]" : "bg-[var(--color-card-bg)] text-[var(--color-text-muted)]"
                     )}>
                       {user?.role === 'Admin' ? t('admin') : t('member')}
                     </span>
@@ -188,7 +190,7 @@ export default function Settings() {
                 {/* Language Selector */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-[var(--color-background-base)]/50 border border-[var(--color-border-subtle)]/30">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-xs border border-[var(--color-border-subtle)]/50">
+                    <div className="w-12 h-12 bg-[var(--color-card-bg)] rounded-2xl flex items-center justify-center shadow-xs border border-[var(--color-border-subtle)]/50">
                       <Globe size={20} className="text-blue-500" />
                     </div>
                     <div>
@@ -205,7 +207,7 @@ export default function Settings() {
                           "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
                           language === lang.code 
                             ? "bg-[var(--color-primary)] text-white shadow-md shadow-[#5A5A40]/20" 
-                            : "bg-white text-[var(--color-text-muted)] border border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]"
+                            : "bg-[var(--color-card-bg)] text-[var(--color-text-muted)] border border-[var(--color-border-subtle)] hover:border-[var(--color-primary)]"
                         )}
                       >
                         {lang.name}
@@ -217,7 +219,7 @@ export default function Settings() {
                 {/* Appearance */}
                 <div className="flex items-center justify-between p-6 rounded-3xl bg-[var(--color-background-base)]/50 border border-[var(--color-border-subtle)]/30">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-xs border border-[var(--color-border-subtle)]/50">
+                    <div className="w-12 h-12 bg-[var(--color-card-bg)] rounded-2xl flex items-center justify-center shadow-xs border border-[var(--color-border-subtle)]/50">
                       {darkMode ? <Moon size={20} className="text-indigo-500" /> : <Sun size={20} className="text-amber-500" />}
                     </div>
                     <div>
@@ -243,7 +245,7 @@ export default function Settings() {
           </section>
 
           {/* Activity Log */}
-          <section className="bg-white rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+          <section className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
             <div className="p-8 border-b border-[var(--color-background-base)] flex items-center justify-between">
               <h3 className="font-bold text-xl text-[var(--color-text-main)] font-display flex items-center gap-3">
                 <History size={22} className="text-[var(--color-primary)]" />
@@ -255,7 +257,7 @@ export default function Settings() {
             </div>
             <div className="divide-y divide-[var(--color-background-base)] max-h-[500px] overflow-y-auto custom-scrollbar">
               {logs.map((log) => (
-                <div key={log.id} className="p-6 flex items-start gap-5 hover:bg-[#FBFBFA] transition-all group">
+                <div key={log.id} className="p-6 flex items-start gap-5 hover:bg-[var(--color-background-base)] transition-all group">
                   <div className="mt-1 w-10 h-10 rounded-xl bg-[var(--color-background-base)] flex items-center justify-center shrink-0 border border-transparent group-hover:border-[var(--color-border-subtle)] transition-all">
                     <Info size={16} className="text-[var(--color-text-muted)]" />
                   </div>
@@ -275,7 +277,7 @@ export default function Settings() {
               ))}
               {logs.length === 0 && (
                 <div className="p-20 text-center space-y-3">
-                  <div className="w-16 h-16 bg-[var(--color-background-base)] rounded-full flex items-center justify-center mx-auto text-zinc-300">
+                  <div className="w-16 h-16 bg-[var(--color-background-base)] rounded-full flex items-center justify-center mx-auto text-[var(--color-text-muted)] opacity-50">
                     <History size={32} />
                   </div>
                   <p className="text-sm text-[var(--color-text-muted)] italic font-medium">No activity logs recorded yet.</p>
@@ -289,7 +291,7 @@ export default function Settings() {
         <div className="lg:col-span-4 space-y-8">
           
           {/* Data Management */}
-          <section className="bg-white p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs space-y-6">
+          <section className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs space-y-6">
             <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display flex items-center gap-3">
               <Download size={18} className="text-green-500" />
               {t('data_control')}
@@ -343,7 +345,7 @@ export default function Settings() {
           </section>
 
           {/* Sustainability */}
-          <section className="bg-white p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs">
+          <section className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display flex items-center gap-3">
                 <Trash2 size={18} className="text-red-500" />
@@ -353,11 +355,11 @@ export default function Settings() {
                 <span className="text-[10px] font-black text-red-500">85</span>
               </div>
             </div>
-            <div className="p-6 bg-gradient-to-br from-zinc-50 to-white rounded-3xl border border-[var(--color-border-subtle)]/50">
+            <div className="p-6 bg-gradient-to-br from-[var(--color-background-base)] to-[var(--color-card-bg)] rounded-3xl border border-[var(--color-border-subtle)]/50">
               <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-center mb-4">Sustainability Score</p>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 space-y-1">
-                  <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                   <div className="h-2 bg-[var(--color-background-base)] rounded-full overflow-hidden">
                     <div className="w-[85%] h-full bg-[#2E7D32]" />
                   </div>
                   <p className="text-[8px] font-bold text-[#2E7D32] uppercase tracking-tighter">Excellent Status</p>
@@ -373,12 +375,12 @@ export default function Settings() {
           <section className="p-8 rounded-[2.5rem] border border-red-100 bg-red-50/30 space-y-6">
             <div className="flex items-center gap-3">
               <AlertCircle size={18} className="text-red-600" />
-              <h3 className="font-bold text-lg text-red-900 font-display">{t('danger_zone')}</h3>
+              <h3 className="font-bold text-lg text-red-900 dark:text-red-200 font-display">{t('danger_zone')}</h3>
             </div>
-            <p className="text-xs text-red-800 font-medium leading-relaxed opacity-70">
+            <p className="text-xs text-red-800 dark:text-red-300 font-medium leading-relaxed opacity-70">
               Irreversible actions related to your household data. Please proceed with extreme caution.
             </p>
-            <button className="w-full py-4 px-6 rounded-2xl bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
+            <button className="w-full py-4 px-6 rounded-2xl bg-[var(--color-card-bg)] border border-red-200 dark:border-red-900/30 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
               <ShieldAlert size={14} />
               {t('reset_data')}
             </button>

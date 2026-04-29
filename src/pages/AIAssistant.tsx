@@ -34,7 +34,9 @@ export default function AIAssistant() {
     setLoading(true);
     setResponse('');
     const aiRes = await getAIResponse(queryText, inventory);
-    setResponse(aiRes);
+    // Clean response of common markdown symbols just in case
+    const cleanRes = aiRes.replace(/[\*#_~`]/g, '');
+    setResponse(cleanRes);
     setLoading(false);
     setPrompt('');
   };
@@ -62,9 +64,9 @@ export default function AIAssistant() {
           <button
             key={i}
             onClick={() => handleAsk(s.prompt)}
-            className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-[var(--color-border-subtle)] hover:border-[var(--color-primary)] hover:bg-[var(--color-background-base)] transition-all text-left group shadow-xs"
+            className="flex items-center gap-4 p-5 bg-[var(--color-card-bg)] rounded-2xl border border-[var(--color-border-subtle)] hover:border-[var(--color-primary)] hover:bg-[var(--color-background-base)] transition-all text-left group shadow-xs"
           >
-            <div className="w-12 h-12 bg-[var(--color-background-base)] rounded-xl flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:bg-white transition-all shadow-xs">
+            <div className="w-12 h-12 bg-[var(--color-background-base)] rounded-xl flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:bg-[var(--color-card-bg)] transition-all shadow-xs">
               <s.icon size={22} />
             </div>
             <span className="text-sm font-bold text-[var(--color-text-main)]">{s.label}</span>
@@ -72,10 +74,10 @@ export default function AIAssistant() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col-reverse gap-6">
         <div className="relative">
           <textarea
-            className="w-full p-6 pr-20 border border-[var(--color-border-subtle)] rounded-3xl bg-white focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] resize-none min-h-[160px] text-sm leading-relaxed shadow-xs"
+            className="w-full p-6 pr-20 border border-[var(--color-border-subtle)] rounded-3xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] resize-none min-h-[120px] text-sm leading-relaxed shadow-xs"
             placeholder="Ask me anything about your fridge..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -90,23 +92,25 @@ export default function AIAssistant() {
 
         {response && (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="ai-panel p-10 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xl relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #FDFCFB 0%, #E5E2DA 100%)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="ai-panel p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xl relative overflow-hidden bg-gradient-to-br from-[var(--color-card-bg)] to-[var(--color-background-base)]"
           >
             <div className="prose prose-sm max-w-none prose-neutral">
               <div className="flex items-center gap-3 text-[var(--color-primary)] font-black text-xs uppercase tracking-widest mb-6">
-                <div className="p-2 bg-white rounded-lg shadow-xs"><Bot size={18} /></div>
+                <div className="p-2 bg-[var(--color-card-bg)] rounded-lg shadow-xs"><Bot size={18} /></div>
                 <span>Arctic AI Assistant</span>
               </div>
               <div className="text-[var(--color-text-main)] leading-relaxed whitespace-pre-wrap font-medium">
                 {response}
               </div>
             </div>
+            {/* Speech bubble arrow */}
+            <div className="absolute bottom-0 left-10 w-6 h-6 bg-[var(--color-background-base)] rotate-45 translate-y-3 border-r border-b border-[var(--color-border-subtle)]" />
           </motion.div>
         )}
       </div>
+
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[var(--color-border-subtle)] hidden lg:flex flex-col z-30">
+    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[var(--color-card-bg)] border-r border-[var(--color-border-subtle)] hidden lg:flex flex-col z-30">
       <div className="p-8 flex flex-col mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#5A5A40]/20">
@@ -65,20 +65,21 @@ export default function Sidebar() {
 
       <div className="p-6 border-t border-[var(--color-border-subtle)] space-y-1 bg-[var(--color-background-base)]/50">
         <div className="px-4 py-3 mb-2">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('user')}</p>
-          <p className="text-sm font-medium text-zinc-900 mt-1 truncate">{user?.username}</p>
-          <span className="inline-block px-2 py-0.5 bg-zinc-100 text-[10px] font-bold text-zinc-500 rounded mt-1">
+          <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">{t('user')}</p>
+          <p className="text-sm font-medium text-[var(--color-text-main)] mt-1 truncate">{user?.username}</p>
+          <span className="inline-block px-2 py-0.5 bg-[var(--color-background-base)] text-[10px] font-bold text-[var(--color-text-muted)] rounded mt-1">
             {user?.role === 'Admin' ? t('admin') : t('member')}
           </span>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all font-sans"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all font-sans"
         >
           <LogOut size={20} />
           {t('logout')}
         </button>
       </div>
     </aside>
+
   );
 }
