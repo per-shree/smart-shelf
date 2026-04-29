@@ -179,7 +179,7 @@ export default function Settings() {
           </section>
 
           {/* App Preferences */}
-          <section className="bg-white rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+          <section className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
             <div className="p-8 space-y-8">
               <h3 className="font-bold text-xl text-[var(--color-text-main)] font-display flex items-center gap-3">
                 <Globe size={22} className="text-[var(--color-primary)]" />
@@ -227,13 +227,13 @@ export default function Settings() {
                       <p className="text-xs text-[var(--color-text-muted)]">Switch between light and dark themes.</p>
                     </div>
                   </div>
-                  <button 
-                    onClick={toggleDarkMode}
-                    className={cn(
-                      "w-16 h-8 rounded-full transition-all relative block p-1.5",
-                      darkMode ? "bg-indigo-600 shadow-inner" : "bg-zinc-200"
-                    )}
-                  >
+                    <button 
+                      onClick={toggleDarkMode}
+                      className={cn(
+                        "w-16 h-8 rounded-full transition-all relative block p-1.5 border border-[var(--color-border-subtle)]",
+                        darkMode ? "bg-[var(--color-primary)] shadow-inner border-transparent" : "bg-[var(--color-background-base)]"
+                      )}
+                    >
                     <motion.div 
                       animate={{ x: darkMode ? 32 : 0 }}
                       className="w-5 h-5 bg-white rounded-full shadow-md"
@@ -372,7 +372,7 @@ export default function Settings() {
           </section>
 
           {/* Danger Zone */}
-          <section className="p-8 rounded-[2.5rem] border border-red-100 bg-red-50/30 space-y-6">
+          <section className="p-8 rounded-[2.5rem] border border-red-100 dark:border-red-900/30 bg-red-50/30 dark:bg-red-950/20 space-y-6">
             <div className="flex items-center gap-3">
               <AlertCircle size={18} className="text-red-600" />
               <h3 className="font-bold text-lg text-red-900 dark:text-red-200 font-display">{t('danger_zone')}</h3>
