@@ -2,14 +2,22 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-export async function getAIResponse(promptString: string, inventory: any[]) {
+export async function getAIResponse(promptString: string, inventory: any[], language: string = 'en') {
   try {
     const inventoryContext = inventory.map(p => 
       `${p.name} (${p.category}) - Expiry: ${p.expiryDate}, Quantity: ${p.quantity}`
     ).join('\n');
 
+    const languageInstruction = language === 'mr' 
+      ? "IMPORTANT: You must respond in Marathi (मराठी)." 
+      : language === 'hi' 
+        ? "IMPORTANT: You must respond in Hindi (हिंदी)." 
+        : "IMPORTANT: You must respond in English.";
+
+    const assistantName = language === 'mr' ? 'स्मार्ट शेल्फ सहाय्यक' : language === 'hi' ? 'स्मार्ट शेल्फ सहायक' : 'Smart Shelf Management Assistant';
+
     const fullPrompt = `
-      You are a Smart Shelf Management Assistant. 
+      You are a ${assistantName}. 
       You help users manage their items, suggest recipes, and reduce waste.
       
       Current Inventory:
@@ -18,6 +26,7 @@ export async function getAIResponse(promptString: string, inventory: any[]) {
       User Question/Request:
       ${promptString}
       
+      ${languageInstruction}
       Provide a helpful, concise, and professional response in plain text only. 
       IMPORTANT: Do not use any markdown formatting like asterisks (**), hashes (##), or bullet points (*). 
       Use simple newlines for structure and stay very clean.

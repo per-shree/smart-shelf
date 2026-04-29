@@ -3,8 +3,10 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopMetrics from './TopMetrics';
 import { Menu, X, Refrigerator } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Layout() {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
@@ -41,7 +43,7 @@ export default function Layout() {
               <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center text-white shadow-sm">
                 <Refrigerator size={18} />
               </div>
-              <span className="font-display font-bold text-lg text-[var(--color-primary)] tracking-tight">Smart Shelf</span>
+              <span className="font-display font-bold text-lg text-[var(--color-primary)] tracking-tight">{t('app_title')}</span>
             </div>
           </div>
           <button 

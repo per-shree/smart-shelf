@@ -9,7 +9,7 @@ import { getAIResponse } from '../services/aiService';
 import { Product } from '../types';
 
 export default function AIAssistant() {
-  const { fridge } = useAuth();
+  const { fridge, language } = useAuth();
   const { t } = useTranslation();
   const [inventory, setInventory] = useState<Product[]>([]);
   const [prompt, setPrompt] = useState('');
@@ -40,7 +40,7 @@ export default function AIAssistant() {
     
     setLoading(true);
     setResponse('');
-    const aiRes = await getAIResponse(queryText, inventory);
+    const aiRes = await getAIResponse(queryText, inventory, language);
     // Clean response of common markdown symbols just in case
     const cleanRes = aiRes.replace(/[\*#_~`]/g, '');
     setResponse(cleanRes);
@@ -49,11 +49,11 @@ export default function AIAssistant() {
   };
 
   const suggestions = [
-    { icon: Search, label: 'Search for a Product', prompt: 'Is there any milk in my fridge?' },
-    { icon: Utensils, label: 'Suggest Recipes', prompt: 'Suggest some recipes based on what I have.' },
-    { icon: Trash2, label: 'Reduce Food Wastage', prompt: 'How can I reduce food wastage with my current stock?' },
-    { icon: Clock, label: 'Expiry Warnings', prompt: 'Which items are expiring soon and what should I do with them?' },
-    { icon: Zap, label: 'Leftover Management', prompt: 'Give me suggestions for leftover food management.' },
+    { icon: Search, label: t('suggestion_search'), prompt: t('prompt_search') },
+    { icon: Utensils, label: t('suggestion_recipes'), prompt: t('prompt_recipes') },
+    { icon: Trash2, label: t('suggestion_waste'), prompt: t('prompt_waste') },
+    { icon: Clock, label: t('suggestion_expiry'), prompt: t('prompt_expiry') },
+    { icon: Zap, label: t('suggestion_leftover'), prompt: t('prompt_leftover') },
   ];
 
   return (
@@ -63,7 +63,7 @@ export default function AIAssistant() {
           <Bot className="text-blue-600" />
           {t('ai_assistant')}
         </h2>
-        <p className="text-zinc-500 mt-1">Your smart companion for kitchen management.</p>
+        <p className="text-zinc-500 mt-1">{t('ai_companion_desc')}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -85,7 +85,7 @@ export default function AIAssistant() {
         <div className="relative">
           <textarea
             className="w-full p-6 pr-20 border border-[var(--color-border-subtle)] rounded-3xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] resize-none min-h-[120px] text-sm leading-relaxed shadow-xs"
-            placeholder="Ask me anything about your fridge..."
+            placeholder={t('ai_placeholder')}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           />
@@ -106,7 +106,7 @@ export default function AIAssistant() {
             <div className="prose prose-sm max-w-none prose-neutral">
               <div className="flex items-center gap-3 text-[var(--color-primary)] font-black text-xs uppercase tracking-widest mb-6">
                 <div className="p-2 bg-[var(--color-card-bg)] rounded-lg shadow-xs"><Bot size={18} /></div>
-                <span>Smart Shelf AI</span>
+                <span>{t('app_title')} AI</span>
               </div>
               
               {loading ? (
@@ -115,7 +115,7 @@ export default function AIAssistant() {
                     <div className="w-12 h-12 border-4 border-[var(--color-primary)]/20 border-t-[var(--color-primary)] rounded-full animate-spin" />
                     <Bot className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--color-primary)]" size={20} />
                   </div>
-                  <p className="text-xs font-bold text-[var(--color-text-muted)] animate-pulse tracking-widest uppercase">Thinking...</p>
+                  <p className="text-xs font-bold text-[var(--color-text-muted)] animate-pulse tracking-widest uppercase">{t('ai_thinking')}</p>
                 </div>
               ) : (
                 <div className="text-[var(--color-text-main)] leading-relaxed whitespace-pre-wrap font-medium">

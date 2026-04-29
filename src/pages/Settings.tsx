@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,7 +22,8 @@ import {
   Info,
   ChevronRight,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { cn, formatDate } from '../lib/utils';
 
@@ -34,8 +36,9 @@ interface ActivityLog {
 }
 
 export default function Settings() {
-  const { fridge, user, updateUser, language, setLanguage } = useAuth();
+  const { fridge, user, updateUser, logout, language, setLanguage } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -369,6 +372,28 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* Logout Section */}
+          <section className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500">
+                <LogOut size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display">{t('logout')}</h3>
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">End your current session safely.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                logout?.();
+                navigate('/language');
+              }}
+              className="px-6 py-3 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-md shadow-red-500/20"
+            >
+              {t('logout')}
+            </button>
           </section>
 
           {/* Danger Zone */}

@@ -48,12 +48,12 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#5A5A40]/20">
             <Refrigerator size={24} />
           </div>
-          <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">Smart Shelf</span>
+          <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">{t('app_title')}</span>
         </div>
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] mt-2 font-bold ml-1">SMART MANAGEMENT</p>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => (
           <NavLink
             key={item.to}

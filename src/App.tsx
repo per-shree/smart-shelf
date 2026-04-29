@@ -18,6 +18,7 @@ export default function App() {
 
   useEffect(() => {
     i18n.changeLanguage(language);
+    document.documentElement.setAttribute('lang', language);
   }, [language, i18n]);
 
   useEffect(() => {

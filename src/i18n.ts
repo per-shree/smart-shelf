@@ -86,7 +86,21 @@ const resources = {
       "password_share_notice": "This password will be shared with your household members.",
       "password_logic_notice": "Same Password = Shared Access • Different Password = Private New Shelf",
       "expiring_soon": "expiring soon",
-      "expiry": "Expiry"
+      "expiry": "Expiry",
+      "ai_companion_desc": "Your smart companion for kitchen management.",
+      "ai_placeholder": "Ask me anything about your shelf...",
+      "ai_thinking": "Thinking...",
+      "suggestion_search": "Search for a Product",
+      "suggestion_recipes": "Suggest Recipes",
+      "suggestion_waste": "Reduce Food Wastage",
+      "suggestion_expiry": "Expiry Warnings",
+      "suggestion_leftover": "Leftover Management",
+      "prompt_search": "Is there any milk in my shelf?",
+      "prompt_recipes": "Suggest some recipes based on what I have.",
+      "prompt_waste": "How can I reduce food wastage with my current stock?",
+      "prompt_expiry": "Which items are expiring soon and what should I do with them?",
+      "prompt_leftover": "Give me suggestions for leftover food management.",
+      "app_title": "Smart Shelf"
     }
   },
   hi: {
@@ -172,7 +186,21 @@ const resources = {
       "password_share_notice": "यह पासवर्ड आपके घर के सदस्यों के साथ साझा किया जाएगा।",
       "password_logic_notice": "समान पासवर्ड = साझा पहुंच • अलग पासवर्ड = निजी नया शेल्फ",
       "expiring_soon": "जल्द ही समाप्त हो रहा है",
-      "expiry": "समाप्ति"
+      "expiry": "समाप्ति",
+      "ai_companion_desc": "किचन मैनेजमेंट के लिए आपका स्मार्ट साथी।",
+      "ai_placeholder": "मुझसे अपने शेल्फ के बारे में कुछ भी पूछें...",
+      "ai_thinking": "सोच रहा हूँ...",
+      "suggestion_search": "उत्पाद खोजें",
+      "suggestion_recipes": "रेसिपी सुझाएं",
+      "suggestion_waste": "भोजन की बर्बादी कम करें",
+      "suggestion_expiry": "एक्सपायरी चेतावनी",
+      "suggestion_leftover": "बचे हुए भोजन का प्रबंधन",
+      "prompt_search": "क्या मेरे शेल्फ में दूध है?",
+      "prompt_recipes": "मेरे पास जो है उसके आधार पर कुछ रेसिपी सुझाएं।",
+      "prompt_waste": "मैं अपने वर्तमान स्टॉक के साथ भोजन की बर्बादी को कैसे कम कर सकता हूँ?",
+      "prompt_expiry": "कौन सी चीजें जल्द ही समाप्त हो रही हैं और मुझे उनके साथ क्या करना चाहिए?",
+      "prompt_leftover": "मुझे बचे हुए भोजन प्रबंधन के लिए सुझाव दें।",
+      "app_title": "स्मार्ट शेल्फ"
     }
   },
   mr: {
@@ -258,7 +286,21 @@ const resources = {
       "password_share_notice": "हा पासवर्ड तुमच्या घरातील सदस्यांसह सामायिक केला जाईल.",
       "password_logic_notice": "समान पासवर्ड = सामायिक प्रवेश • भिन्न पासवर्ड = खाजगी नवीन शेल्फ",
       "expiring_soon": "लवकरच संपणार आहे",
-      "expiry": "समाप्ती"
+      "expiry": "समाप्ती",
+      "ai_companion_desc": "स्वयंपाकघर व्यवस्थापनासाठी तुमचा स्मार्ट सोबती.",
+      "ai_placeholder": "तुमच्या शेल्फबद्दल मला काहीही विचारा...",
+      "ai_thinking": "विचार करत आहे...",
+      "suggestion_search": "उत्पादन शोधा",
+      "suggestion_recipes": "रेसिपी सुचवा",
+      "suggestion_waste": "अन्नाची नासाडी कमी करा",
+      "suggestion_expiry": "एक्सपायरी इशारे",
+      "suggestion_leftover": "उरलेल्या अन्नाचे व्यवस्थापन",
+      "prompt_search": "माझ्या शेल्फमध्ये दूध आहे का?",
+      "prompt_recipes": "माझ्याकडे असलेल्या साहित्यावरून काही रेसिपी सुचवा.",
+      "prompt_waste": "माझ्या सध्याच्या साठ्यासह मी अन्नाची नासाडी कशी कमी करू शकतो?",
+      "prompt_expiry": "कोणत्या वस्तू लवकर संपणार आहेत आणि मी त्यांचे काय करावे?",
+      "prompt_leftover": "मला उरलेल्या अन्नाच्या व्यवस्थापनासाठी सूचना द्या.",
+      "app_title": "स्मार्ट शेल्फ"
     }
   }
 };

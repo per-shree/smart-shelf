@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Fridge, Member, Role } from '../types';
+import i18n from '../i18n';
 
 interface AuthContextType {
   user: { username: string; role: Role } | null;
@@ -184,6 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLanguage = (lang: string) => {
     setLanguageState(lang);
     localStorage.setItem('lang', lang);
+    i18n.changeLanguage(lang);
   };
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'motion/react';
 import { Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -12,6 +13,7 @@ const languages = [
 
 export default function LanguagePage() {
   const { setLanguage } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSelect = (code: string) => {
@@ -30,7 +32,7 @@ export default function LanguagePage() {
         <div className="w-16 h-16 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-[#5A5A40]/10">
           <Languages size={32} />
         </div>
-        <h1 className="text-3xl font-bold mb-10 font-display text-[var(--color-text-main)]">Choose Your Language</h1>
+        <h1 className="text-3xl font-bold mb-10 font-display text-[var(--color-text-main)]">{t('language_selection')}</h1>
         <div className="space-y-4">
           {languages.map((lang) => (
             <button
