@@ -94,12 +94,21 @@ export default function Dashboard() {
         <div className="p-6 border-b border-[var(--color-background-base)] flex justify-between items-center">
           <h3 className="font-bold text-lg font-display text-[var(--color-text-main)]">{t('current_inventory')}</h3>
           <div className="flex gap-2">
-            <button className="text-[10px] uppercase font-bold tracking-widest text-[var(--color-primary)] border border-[var(--color-primary)] px-4 py-1.5 rounded-full hover:bg-[var(--color-primary)] hover:text-white transition-all">
-              {t('quick_filter')}
+            <button 
+              onClick={() => setFilter(filter === 'near_expiry' ? 'all' : 'near_expiry')}
+              className={cn(
+                "text-[10px] uppercase font-bold tracking-widest px-4 py-1.5 rounded-full transition-all active:scale-95",
+                filter === 'near_expiry' 
+                  ? "bg-[var(--color-primary)] text-white shadow-md" 
+                  : "text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white"
+              )}
+            >
+              {filter === 'near_expiry' ? 'Showing Urgent' : t('quick_filter')}
             </button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--color-background-base)] text-[10px] uppercase tracking-widest text-[var(--color-text-muted)]">
@@ -112,7 +121,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-subtle)]/30 text-sm">
-              <AnimatePresence>
+              <AnimatePresence mode="popLayout">
                 {filteredProducts.map((p) => {
                   const status = getStatus(p.expiryDate);
                   return (
@@ -121,7 +130,7 @@ export default function Dashboard() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="group hover:bg-[var(--color-background-base)] transition-colors table-row"
+                      className="group hover:bg-[var(--color-background-base)] transition-colors"
                     >
                       <td className="px-8 py-5">
                         <p className="font-bold text-[var(--color-text-main)]">{p.name}</p>
@@ -160,16 +169,72 @@ export default function Dashboard() {
                   );
                 })}
               </AnimatePresence>
-              {filteredProducts.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-400 italic">
-                    {t('no_products')}
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-[var(--color-border-subtle)]/30">
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((p) => {
+              const status = getStatus(p.expiryDate);
+              return (
+                <motion.div 
+                  key={p.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="p-6 space-y-4"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold text-[var(--color-text-main)] text-lg">{p.name}</p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] font-mono opacity-60">REF: {p.id.slice(0, 6).toUpperCase()}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleRemove(p.id, p.name)}
+                      className="p-3 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-xs"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[var(--color-background-base)]/50 p-3 rounded-2xl border border-[var(--color-border-subtle)]/30">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-1">{t('category')}</p>
+                      <p className="text-xs font-bold text-[var(--color-text-main)]">{p.category}</p>
+                    </div>
+                    <div className="bg-[var(--color-background-base)]/50 p-3 rounded-2xl border border-[var(--color-border-subtle)]/30">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-1">{t('quantity')}</p>
+                      <p className="text-xs font-bold text-[var(--color-text-main)]">{p.quantity}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center bg-[var(--color-background-base)] p-4 rounded-2xl border border-[var(--color-border-subtle)]/50">
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-1">{t('expiry_date')}</p>
+                      <p className="text-xs font-bold text-[var(--color-text-main)]">{formatDate(p.expiryDate)}</p>
+                    </div>
+                    <span className={cn(
+                      "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xs",
+                      status === 'fresh' && "bg-[#E8F5E9] dark:bg-[#1B2E1D] text-[#2E7D32] dark:text-[#81C784]",
+                      status === 'near_expiry' && "bg-[#FFF3E0] dark:bg-[#3E2723] text-[#E65100] dark:text-[#FFB74D]",
+                      status === 'expired' && "bg-[#FFEBEE] dark:bg-[#3D1A1A] text-[#C62828] dark:text-[#E57373]",
+                    )}>
+                      {t(status)}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="p-12 text-center text-[var(--color-text-muted)] italic text-sm">
+            {t('no_products')}
+          </div>
+        )}
       </div>
     </div>
   );

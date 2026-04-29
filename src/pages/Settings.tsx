@@ -198,7 +198,7 @@ export default function Settings() {
                       <p className="text-xs text-[var(--color-text-muted)]">Select your preferred language.</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {languages.map((lang) => (
                       <button
                         key={lang.code}

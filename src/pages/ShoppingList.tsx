@@ -125,34 +125,34 @@ export default function ShoppingList() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="text-center sm:text-left">
           <h2 className="text-2xl font-bold font-sans">{t('shopping_list')}</h2>
           <p className="text-zinc-500 mt-1">{t('smart_tracking')}</p>
         </div>
         <button 
           onClick={autoSync}
           disabled={isSyncing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all shadow-xs"
         >
           {isSyncing ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}
           {t('sync_fridge')}
         </button>
       </div>
 
-      <form onSubmit={handleAddItem} className="flex gap-4">
+      <form onSubmit={handleAddItem} className="flex flex-col sm:flex-row gap-4">
         <input
           type="text"
           placeholder={t('add_manually')}
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
-          className="flex-1 px-4 py-3 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+          className="flex-1 px-5 py-4 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
         />
         <button 
           type="submit"
-          className="px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100"
+          className="px-8 py-4 bg-[var(--color-primary)] text-white rounded-2xl font-black flex items-center justify-center hover:opacity-90 transition-all shadow-lg shadow-[#5A5A40]/20"
         >
-          <Plus size={20} />
+          <Plus size={24} />
         </button>
       </form>
 

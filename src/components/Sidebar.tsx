@@ -10,11 +10,12 @@ import {
   Users, 
   Settings, 
   LogOut,
-  Grid3X3
+  Refrigerator,
+  X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     logout();
     navigate('/language');
+    onClose?.();
   };
 
   const navItems = [
@@ -34,11 +36,17 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[var(--color-card-bg)] border-r border-[var(--color-border-subtle)] hidden lg:flex flex-col z-30">
-      <div className="p-8 flex flex-col mb-4">
+    <aside className="h-full w-72 lg:w-64 bg-[var(--color-card-bg)] border-r border-[var(--color-border-subtle)] flex flex-col shadow-2xl lg:shadow-none lg:rounded-none rounded-r-[2.5rem] overflow-hidden">
+      <div className="p-8 flex flex-col mb-4 relative bg-gradient-to-b from-[var(--color-background-base)]/30 to-transparent">
+        <button 
+          onClick={onClose}
+          className="lg:hidden absolute top-5 right-5 p-2.5 bg-[var(--color-background-base)] text-[var(--color-text-muted)] hover:text-red-500 transition-all rounded-xl shadow-sm active:scale-95"
+        >
+          <X size={20} />
+        </button>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#5A5A40]/20">
-            <Grid3X3 size={24} />
+            <Refrigerator size={24} />
           </div>
           <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">Smart Shelf</span>
         </div>
@@ -50,6 +58,7 @@ export default function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={() => onClose?.()}
             className={({ isActive }) => cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all mx-2",
               isActive 

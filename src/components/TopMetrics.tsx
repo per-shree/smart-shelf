@@ -88,8 +88,8 @@ export default function TopMetrics() {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-[var(--color-background-base)]/80 backdrop-blur-md p-6 lg:px-10 lg:pt-8 lg:pb-6">
-      <div className="flex items-center justify-between mb-8">
+    <header className="md:sticky md:top-0 z-20 bg-[var(--color-background-base)]/80 backdrop-blur-md p-6 lg:px-10 lg:pt-8 lg:pb-6">
+      <div className={cn("flex items-center justify-between", location.pathname === '/' ? "mb-8" : "mb-0")}>
         <div className="flex items-center gap-2 text-sm font-medium">
           <span className="text-[var(--color-text-muted)]">Home /</span>
           <span className="text-[var(--color-text-main)]">{getPageTitle()}</span>
@@ -113,7 +113,7 @@ export default function TopMetrics() {
               )}
             </button>
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 bg-[var(--color-card-bg)] rounded-[2rem] border border-[var(--color-border-subtle)] shadow-2xl z-50 overflow-hidden">
+              <div className="fixed inset-x-4 top-20 md:absolute md:inset-auto md:right-0 md:mt-3 md:w-80 bg-[var(--color-card-bg)] rounded-[2rem] border border-[var(--color-border-subtle)] shadow-2xl z-50 overflow-hidden">
                 <div className="p-5 border-b border-[var(--color-border-subtle)] bg-[var(--color-background-base)]/50 flex justify-between items-center">
                   <h3 className="text-xs font-black uppercase tracking-widest text-[var(--color-text-main)]">Notifications</h3>
                   <button onClick={() => setShowNotifications(false)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-all">
@@ -153,34 +153,36 @@ export default function TopMetrics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {cards.map((card, i) => (
-          <div 
-            key={i} 
-            className={cn(
-              "p-5 rounded-3xl border border-[var(--color-border-subtle)] shadow-xs flex flex-col md:flex-row items-center gap-4 transition-all hover:shadow-md",
-              card.color.includes('bg-[var(--color-primary)]') ? "bg-[var(--color-primary)] border-none" : "bg-[var(--color-card-bg)]"
-            )}
-          >
-            <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs",
-              card.color.includes('bg-[var(--color-card-bg)]') ? "bg-[var(--color-background-base)]" : card.color
-            )}>
-              <card.icon size={22} />
+      {location.pathname === '/' && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {cards.map((card, i) => (
+            <div 
+              key={i} 
+              className={cn(
+                "p-5 rounded-3xl border border-[var(--color-border-subtle)] shadow-xs flex flex-col md:flex-row items-center gap-4 transition-all hover:shadow-md",
+                card.color.includes('bg-[var(--color-primary)]') ? "bg-[var(--color-primary)] border-none" : "bg-[var(--color-card-bg)]"
+              )}
+            >
+              <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs",
+                card.color.includes('bg-[var(--color-card-bg)]') ? "bg-[var(--color-background-base)]" : card.color
+              )}>
+                <card.icon size={22} />
+              </div>
+              <div className="text-center md:text-left">
+                <p className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider mb-1",
+                  card.color.includes('text-white') ? "text-white/70" : "text-[var(--color-text-muted)]"
+                )}>{card.label}</p>
+                <p className={cn(
+                  "text-3xl font-bold font-display",
+                  card.color.includes('text-white') ? "text-white" : "text-[var(--color-text-main)]"
+                )}>{card.value}</p>
+              </div>
             </div>
-            <div className="text-center md:text-left">
-              <p className={cn(
-                "text-[10px] font-bold uppercase tracking-wider mb-1",
-                card.color.includes('text-white') ? "text-white/70" : "text-[var(--color-text-muted)]"
-              )}>{card.label}</p>
-              <p className={cn(
-                "text-3xl font-bold font-display",
-                card.color.includes('text-white') ? "text-white" : "text-[var(--color-text-main)]"
-              )}>{card.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

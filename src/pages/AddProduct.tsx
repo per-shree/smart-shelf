@@ -63,7 +63,7 @@ export default function AddProduct() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[var(--color-card-bg)] p-10 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs"
+        className="bg-[var(--color-card-bg)] p-6 sm:p-10 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs"
       >
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

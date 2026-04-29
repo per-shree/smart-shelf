@@ -63,7 +63,7 @@ export default function MemberManagement() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-[var(--color-card-bg)] p-6 rounded-[2rem] border border-[var(--color-border-subtle)] shadow-xs"
         >
-          <form onSubmit={handleAddMember} className="flex gap-4">
+          <form onSubmit={handleAddMember} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <User className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
               <input
@@ -77,7 +77,7 @@ export default function MemberManagement() {
             <button 
               type="submit"
               disabled={loading}
-              className="px-8 btn-primary flex items-center justify-center gap-2"
+              className="px-8 py-3.5 btn-primary flex items-center justify-center gap-2 whitespace-nowrap"
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : <UserPlus size={18} />}
               <span className="uppercase tracking-widest text-[10px] font-black">{t('add')}</span>

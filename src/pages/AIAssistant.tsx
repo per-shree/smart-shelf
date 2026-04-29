@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,13 @@ export default function AIAssistant() {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const responseRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (loading || response) {
+      responseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [loading, response]);
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -59,7 +66,7 @@ export default function AIAssistant() {
         <p className="text-zinc-500 mt-1">Your smart companion for kitchen management.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {suggestions.map((s, i) => (
           <button
             key={i}
@@ -89,9 +96,9 @@ export default function AIAssistant() {
             {loading ? <Loader2 className="animate-spin" size={24} /> : <Send size={24} />}
           </button>
         </div>
-
         {(loading || response) && (
           <motion.div 
+            ref={responseRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="ai-panel p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xl relative overflow-hidden bg-gradient-to-br from-[var(--color-card-bg)] to-[var(--color-background-base)]"
