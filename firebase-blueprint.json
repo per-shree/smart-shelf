@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "Fridge": {
+      "title": "Refrigerator Group",
+      "description": "Represents a shared refrigerator environment identified by a password.",
+      "type": "object",
+      "properties": {
+        "password": { "type": "string", "description": "The hashed shared password for this fridge." },
+        "adminUsername": { "type": "string", "description": "Username of the admin who created it." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "settings": { "type": "object" }
+      },
+      "required": ["password", "adminUsername", "createdAt"]
+    },
+    "Product": {
+      "title": "Food Product",
+      "description": "An item stored in the refrigerator.",
+      "type": "object",
+      "properties": {
+        "fridgeId": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "quantity": { "type": "integer" },
+        "status": { "type": "string", "enum": ["fresh", "near_expiry", "expired"] },
+        "addedBy": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" },
+        "isRemoved": { "type": "boolean" },
+        "removedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fridgeId", "name", "category", "expiryDate", "addedBy", "addedAt"]
+    },
+    "Member": {
+      "title": "Household Member",
+      "description": "A person with access to the refrigerator.",
+      "type": "object",
+      "properties": {
+        "fridgeId": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["Admin", "Member"] },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fridgeId", "username", "role", "joinedAt"]
+    },
+    "ShoppingListItem": {
+      "title": "Shopping List Item",
+      "description": "Products to be purchased.",
+      "type": "object",
+      "properties": {
+        "fridgeId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["auto", "manual"] },
+        "reason": { "type": "string", "description": "e.g., 'expired', 'low quantity'" },
+        "isPurchased": { "type": "boolean" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fridgeId", "name", "type", "isPurchased", "addedAt"]
+    }
+  },
+  "firestore": {
+    "/fridges/{fridgeId}": {
+      "schema": "Fridge",
+      "description": "Collection of unique refrigerator instances."
+    },
+    "/fridges/{fridgeId}/products/{productId}": {
+      "schema": "Product",
+      "description": "Items inside a specific fridge."
+    },
+    "/fridges/{fridgeId}/members/{memberId}": {
+      "schema": "Member",
+      "description": "Access control list for a fridge."
+    },
+    "/fridges/{fridgeId}/shoppingList/{itemId}": {
+      "schema": "ShoppingListItem",
+      "description": "Groceries to buy for a fridge."
+    }
+  }
+}
