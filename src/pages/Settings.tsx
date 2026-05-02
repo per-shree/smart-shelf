@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -23,23 +23,17 @@ import {
   ChevronRight,
   ShieldCheck,
   AlertCircle,
-  LogOut
+  LogOut,
+  Upload
 } from 'lucide-react';
 import { cn, formatDate } from '../lib/utils';
 
-interface ActivityLog {
-  id: string;
-  action: string;
-  details: string;
-  timestamp: string;
-  user: string;
-}
+
 
 export default function Settings() {
   const { fridge, user, updateUser, logout, language, setLanguage } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editUsername, setEditUsername] = useState(user?.username || '');
@@ -49,15 +43,6 @@ export default function Settings() {
       setEditUsername(user.username);
     }
   }, [user]);
-
-  useEffect(() => {
-    if (!fridge) return;
-    const logsRef = collection(db, `fridges/${fridge.id}/activity_logs`);
-    const q = query(logsRef, orderBy('timestamp', 'desc'));
-    return onSnapshot(q, (snapshot) => {
-      setLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ActivityLog)).slice(0, 15));
-    });
-  }, [fridge]);
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
@@ -94,6 +79,50 @@ export default function Settings() {
     a.href = url;
     a.download = `fridge_backup_${new Date().toISOString()}.json`;
     a.click();
+  };
+
+  const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!fridge || !e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (Array.isArray(data)) {
+          const batch = writeBatch(db);
+          const productsRef = collection(db, `fridges/${fridge.id}/products`);
+          data.forEach(item => {
+            const newDocRef = doc(productsRef);
+            batch.set(newDocRef, item);
+          });
+          await batch.commit();
+          alert('Backup restored successfully!');
+        }
+      } catch (err) {
+        alert('Invalid backup file');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetData = async () => {
+    if (!fridge || !window.confirm('Are you sure you want to reset all refrigerator data? This cannot be undone.')) return;
+    try {
+      const batch = writeBatch(db);
+      
+      const productsRef = collection(db, `fridges/${fridge.id}/products`);
+      const prodSnap = await getDocs(productsRef);
+      prodSnap.docs.forEach(d => batch.delete(d.ref));
+      
+      const logsRef = collection(db, `fridges/${fridge.id}/activity_logs`);
+      const logsSnap = await getDocs(logsRef);
+      logsSnap.docs.forEach(d => batch.delete(d.ref));
+      
+      await batch.commit();
+      alert('Data reset successfully');
+    } catch (err) {
+      alert('Failed to reset data');
+    }
   };
 
   const healthTips = [
@@ -246,72 +275,39 @@ export default function Settings() {
               </div>
             </div>
           </section>
-
-          {/* Activity Log */}
-          <section className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
-            <div className="p-8 border-b border-[var(--color-background-base)] flex items-center justify-between">
-              <h3 className="font-bold text-xl text-[var(--color-text-main)] font-display flex items-center gap-3">
-                <History size={22} className="text-[var(--color-primary)]" />
-                {t('recent_activity')}
-              </h3>
-              <span className="text-[9px] font-black uppercase tracking-widest bg-[var(--color-background-base)] px-3 py-1.5 rounded-full text-[var(--color-text-muted)]">
-                Last 15 Events
-              </span>
-            </div>
-            <div className="divide-y divide-[var(--color-background-base)] max-h-[500px] overflow-y-auto custom-scrollbar">
-              {logs.map((log) => (
-                <div key={log.id} className="p-6 flex items-start gap-5 hover:bg-[var(--color-background-base)] transition-all group">
-                  <div className="mt-1 w-10 h-10 rounded-xl bg-[var(--color-background-base)] flex items-center justify-center shrink-0 border border-transparent group-hover:border-[var(--color-border-subtle)] transition-all">
-                    <Info size={16} className="text-[var(--color-text-muted)]" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-[var(--color-text-main)]">{log.action}</p>
-                      <span className="text-[9px] text-[var(--color-text-muted)] font-bold italic opacity-60">{formatDate(log.timestamp)}</span>
-                    </div>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1 font-medium">{log.details}</p>
-                    <div className="mt-2.5">
-                      <span className="text-[9px] font-black uppercase tracking-[0.15em] text-[var(--color-primary)] bg-[var(--color-primary)]/5 px-2 py-1 rounded-md">
-                        {log.user}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {logs.length === 0 && (
-                <div className="p-20 text-center space-y-3">
-                  <div className="w-16 h-16 bg-[var(--color-background-base)] rounded-full flex items-center justify-center mx-auto text-[var(--color-text-muted)] opacity-50">
-                    <History size={32} />
-                  </div>
-                  <p className="text-sm text-[var(--color-text-muted)] italic font-medium">No activity logs recorded yet.</p>
-                </div>
-              )}
-            </div>
-          </section>
         </div>
 
         {/* Sidebar Widgets */}
         <div className="lg:col-span-4 space-y-8">
           
           {/* Data Management */}
-          <section className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs space-y-6">
-            <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display flex items-center gap-3">
-              <Download size={18} className="text-green-500" />
-              {t('data_control')}
-            </h3>
-            <p className="text-xs text-[var(--color-text-muted)] font-medium leading-relaxed">
-              Export your refrigerator inventory as a portable JSON file for backup or analysis.
-            </p>
-            <button 
-              onClick={handleExport}
-              className="w-full btn-primary group overflow-hidden"
-            >
-              <div className="flex items-center justify-center gap-3 relative">
-                <Download size={16} />
-                <span className="uppercase text-[10px] font-black tracking-widest">{t('download_backup')}</span>
+          {user?.role === 'Admin' && (
+            <section className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs space-y-6">
+              <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display flex items-center gap-3">
+                <Download size={18} className="text-green-500" />
+                {t('data_control')}
+              </h3>
+              <p className="text-xs text-[var(--color-text-muted)] font-medium leading-relaxed">
+                Export or import your refrigerator inventory as a portable JSON file.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={handleExport}
+                  className="w-full btn-primary group overflow-hidden"
+                >
+                  <div className="flex items-center justify-center gap-3 relative">
+                    <Download size={16} />
+                    <span className="uppercase text-[10px] font-black tracking-widest">{t('download_backup')}</span>
+                  </div>
+                </button>
+                <label className="w-full cursor-pointer flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-base)] hover:bg-[var(--color-border-subtle)] transition-colors text-[var(--color-text-main)]">
+                  <Upload size={16} />
+                  <span className="uppercase text-[10px] font-black tracking-widest">Restore Backup</span>
+                  <input type="file" accept=".json" className="hidden" onChange={handleRestore} />
+                </label>
               </div>
-            </button>
-          </section>
+            </section>
+          )}
 
           {/* Fridge Insights */}
           <section className="bg-[var(--color-primary)] p-8 rounded-[2.5rem] text-white shadow-xl shadow-[#5A5A40]/20 relative overflow-hidden group">
@@ -397,19 +393,24 @@ export default function Settings() {
           </section>
 
           {/* Danger Zone */}
-          <section className="p-8 rounded-[2.5rem] border border-red-100 dark:border-red-900/30 bg-red-50/30 dark:bg-red-950/20 space-y-6">
-            <div className="flex items-center gap-3">
-              <AlertCircle size={18} className="text-red-600" />
-              <h3 className="font-bold text-lg text-red-900 dark:text-red-200 font-display">{t('danger_zone')}</h3>
-            </div>
-            <p className="text-xs text-red-800 dark:text-red-300 font-medium leading-relaxed opacity-70">
-              Irreversible actions related to your household data. Please proceed with extreme caution.
-            </p>
-            <button className="w-full py-4 px-6 rounded-2xl bg-[var(--color-card-bg)] border border-red-200 dark:border-red-900/30 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
-              <ShieldAlert size={14} />
-              {t('reset_data')}
-            </button>
-          </section>
+          {user?.role === 'Admin' && (
+            <section className="p-8 rounded-[2.5rem] border border-red-100 dark:border-red-900/30 bg-red-50/30 dark:bg-red-950/20 space-y-6">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} className="text-red-600" />
+                <h3 className="font-bold text-lg text-red-900 dark:text-red-200 font-display">{t('danger_zone')}</h3>
+              </div>
+              <p className="text-xs text-red-800 dark:text-red-300 font-medium leading-relaxed opacity-70">
+                Irreversible actions related to your household data. Please proceed with extreme caution.
+              </p>
+              <button 
+                onClick={handleResetData}
+                className="w-full py-4 px-6 rounded-2xl bg-[var(--color-card-bg)] border border-red-200 dark:border-red-900/30 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2"
+              >
+                <ShieldAlert size={14} />
+                {t('reset_data')}
+              </button>
+            </section>
+          )}
 
         </div>
       </div>

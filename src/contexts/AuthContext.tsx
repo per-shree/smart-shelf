@@ -9,7 +9,7 @@ interface AuthContextType {
   fridge: Fridge | null;
   language: string;
   setLanguage: (lang: string) => void;
-  login: (username: string, password: string, role: Role) => Promise<void>;
+  login: (username: string, password: string, role: Role, email?: string, isOtpVerified?: boolean) => Promise<{ requiresOtp: boolean, email?: string } | void>;
   logout: () => void;
   updateUser: (newUsername: string) => Promise<void>;
   isLoading: boolean;
@@ -18,6 +18,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<{ username: string; role: Role } | null>(null);
@@ -49,12 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (username: string, password: string, role: Role) => {
+  const login = async (username: string, password: string, role: Role, email?: string, isOtpVerified?: boolean): Promise<{ requiresOtp: boolean, email?: string } | void> => {
     setIsLoading(true);
     const fridgePath = 'fridges';
     try {
+      const hashedPassword = await hashPassword(password);
       const fridgesRef = collection(db, fridgePath);
-      const q = query(fridgesRef, where('passwordHash', '==', password));
+      const q = query(fridgesRef, where('passwordHash', '==', hashedPassword));
       
       let querySnapshot;
       try {
@@ -70,8 +79,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Create new fridge if Admin
         if (role === Role.Admin) {
           const newFridge = {
-            passwordHash: password,
+            passwordHash: hashedPassword,
             adminUsername: username,
+            adminEmail: email || '',
             createdAt: new Date().toISOString(),
           };
           try {
@@ -87,7 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         const fridgeDoc = querySnapshot.docs[0];
-        currentFridge = { id: fridgeDoc.id, ...fridgeDoc.data() } as Fridge;
+        const fData = fridgeDoc.data() as Fridge;
+        currentFridge = { id: fridgeDoc.id, ...fData };
+        
+        // If it's an admin login and OTP is not verified, return requiresOtp
+        if (role === Role.Admin && currentFridge.adminUsername === username && !isOtpVerified) {
+          setIsLoading(false);
+          return { requiresOtp: true, email: currentFridge.adminEmail };
+        }
       }
 
       // Check if user is already a member

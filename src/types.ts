@@ -44,6 +44,7 @@ export interface Fridge {
   id: string;
   passwordHash: string;
   adminUsername: string;
+  adminEmail?: string;
   createdAt: string;
 }
 
