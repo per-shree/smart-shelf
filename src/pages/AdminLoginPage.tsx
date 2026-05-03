@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
-import { Shield, User, Lock, Loader2, Mail, KeyRound } from 'lucide-react';
+import { Shield, User, Lock, Loader2, Mail, KeyRound, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Role } from '../types';
 import { cn } from '../lib/utils';
+import { emailService } from '../services/emailService';
 
 export default function AdminLoginPage() {
   const { login } = useAuth();
@@ -17,11 +18,36 @@ export default function AdminLoginPage() {
   const [otp, setOtp] = useState('');
   
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   
   const [showOtp, setShowOtp] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState('');
+  const [targetEmail, setTargetEmail] = useState('');
+
+  const generateAndSendOtp = async (destEmail: string) => {
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(newOtp);
+    setTargetEmail(destEmail);
+    
+    try {
+      await emailService.sendOTP(destEmail, newOtp);
+      setSuccess(`OTP sent to ${destEmail}`);
+      setShowOtp(true);
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please check your EmailJS configuration.");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResending(true);
+    setError('');
+    await generateAndSendOtp(targetEmail || email);
+    setResending(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,13 +72,7 @@ export default function AdminLoginPage() {
       } else {
         const result = await login(username, password, Role.Admin, email, false);
         if (result?.requiresOtp) {
-          const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-          setGeneratedOtp(newOtp);
-          setShowOtp(true);
-          
-          // MOCK EMAIL SENDING
-          alert(`[MOCK EMAIL]\nSent to: ${result.email || 'Admin'}\nYour OTP is: ${newOtp}`);
-          console.log(`[MOCK EMAIL] OTP for ${result.email || 'Admin'} is: ${newOtp}`);
+          await generateAndSendOtp(result.email || email);
         } else {
           navigate('/admin');
         }
@@ -123,6 +143,8 @@ export default function AdminLoginPage() {
                   <User className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
                   <input
                     type="text"
+                    id="admin-username"
+                    name="username"
                     placeholder={t('username')}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -135,6 +157,8 @@ export default function AdminLoginPage() {
                     <Mail className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
                     <input
                       type="email"
+                      id="admin-email"
+                      name="email"
                       placeholder="Admin Email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -147,6 +171,8 @@ export default function AdminLoginPage() {
                   <Lock className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
                   <input
                     type="password"
+                    id="admin-password"
+                    name="password"
                     placeholder={t('password')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -167,6 +193,8 @@ export default function AdminLoginPage() {
                   <KeyRound className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
                   <input
                     type="text"
+                    id="admin-otp"
+                    name="otp"
                     placeholder="Enter 6-digit OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -186,6 +214,12 @@ export default function AdminLoginPage() {
           </AnimatePresence>
 
           {error && <p className="text-red-600 text-[10px] font-bold text-center uppercase tracking-widest">{error}</p>}
+          {success && (
+            <div className="flex items-center justify-center gap-2 text-green-600 text-[10px] font-bold uppercase tracking-widest bg-green-50 py-2 rounded-lg border border-green-100">
+              <CheckCircle2 size={14} />
+              {success}
+            </div>
+          )}
 
           <button
             type="submit"
@@ -197,6 +231,20 @@ export default function AdminLoginPage() {
               {showOtp ? 'Verify OTP' : (isRegister ? t('create_fridge_btn') : t('login_btn'))}
             </span>
           </button>
+
+          {showOtp && (
+            <div className="flex justify-center">
+              <button 
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resending}
+                className="flex items-center gap-2 text-[10px] text-[var(--color-primary)] font-bold uppercase tracking-widest hover:underline disabled:opacity-50"
+              >
+                {resending ? <RefreshCw className="animate-spin" size={14} /> : <RefreshCw size={14} />}
+                Resend OTP
+              </button>
+            </div>
+          )}
 
           {!showOtp && (
             <p className="text-zinc-400 text-[10px] text-center leading-relaxed">

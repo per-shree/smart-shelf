@@ -73,11 +73,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return; // Should not reach here
       }
 
+      if (role === Role.Admin && !isOtpVerified) {
+        setIsLoading(false);
+        // Find the fridge by username and password
+        const q = query(fridgesRef, where('adminUsername', '==', username), where('passwordHash', '==', hashedPassword));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+          // If it's not a registration attempt, throw error
+          if (!email) {
+            throw new Error('Admin credentials incorrect. Please check your username and password.');
+          }
+          // If registration, we can proceed to send OTP to the provided email
+          return { requiresOtp: true, email: email };
+        }
+        
+        const fridgeData = snap.docs[0].data() as Fridge;
+        return { requiresOtp: true, email: fridgeData.adminEmail };
+      }
+
       let currentFridge: Fridge;
 
       if (querySnapshot.empty) {
-        // Create new fridge if Admin
-        if (role === Role.Admin) {
+        // Create new fridge if Admin (and OTP is verified)
+        if (role === Role.Admin && isOtpVerified) {
           const newFridge = {
             passwordHash: hashedPassword,
             adminUsername: username,
@@ -93,18 +112,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } else {
           setIsLoading(false);
-          throw new Error('Refrigerator not found. Please contact your admin.');
+          throw new Error('Refrigerator not found or unauthorized access.');
         }
       } else {
         const fridgeDoc = querySnapshot.docs[0];
         const fData = fridgeDoc.data() as Fridge;
         currentFridge = { id: fridgeDoc.id, ...fData };
-        
-        // If it's an admin login and OTP is not verified, return requiresOtp
-        if (role === Role.Admin && currentFridge.adminUsername === username && !isOtpVerified) {
-          setIsLoading(false);
-          return { requiresOtp: true, email: currentFridge.adminEmail };
-        }
       }
 
       // Check if user is already a member
