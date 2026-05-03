@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const triggerGlobalLoader = () => {
     setIsGlobalLoading(true);
-    setTimeout(() => setIsGlobalLoading(false), 4000);
+    setTimeout(() => setIsGlobalLoading(false), 1200);
   };
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fridgesRef = collection(db, fridgePath);
       
       let currentFridge: Fridge | null = null;
+      let memberSnapshot: any = null;
 
       if (role === Role.Admin) {
         // Admin logs in with their own username and password
@@ -114,16 +115,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error('Incorrect password or shelf not found.');
         }
 
-        // Now find the one where this user is actually a member
-        for (const fDoc of allPotentialFridges) {
+        // Now find the one where this user is actually a member - Parallelized for speed
+        const membershipChecks = allPotentialFridges.map(async (fDoc) => {
           const mRef = collection(db, `fridges/${fDoc.id}/members`);
           const mq = query(mRef, where('username', '==', username));
           const mSnap = await getDocs(mq);
-          
-          if (!mSnap.empty) {
-            currentFridge = { id: fDoc.id, ...fDoc.data() as Fridge };
-            break;
-          }
+          return { fDoc, mSnap, hasMember: !mSnap.empty };
+        });
+
+        const results = await Promise.all(membershipChecks);
+        const match = results.find(r => r.hasMember);
+        
+        if (match) {
+          currentFridge = { id: match.fDoc.id, ...match.fDoc.data() as Fridge };
+          memberSnapshot = match.mSnap;
         }
         
         if (!currentFridge) {
@@ -136,10 +141,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Verify membership
       const memberPath = `fridges/${currentFridge.id}/members`;
       const membersRef = collection(db, memberPath);
-      const mq = query(membersRef, where('username', '==', username));
-      const mSnapshot = await getDocs(mq);
+      
+      // If we don't have the snapshot yet (e.g. Admin or just added), fetch it
+      if (!memberSnapshot) {
+        const mq = query(membersRef, where('username', '==', username));
+        memberSnapshot = await getDocs(mq);
+      }
 
-      if (mSnapshot.empty) {
+      if (memberSnapshot.empty) {
         if (role === Role.Admin) {
           // Auto-add admin as member if first time
           await addDoc(membersRef, {
@@ -151,7 +160,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error('Member not found. Please contact your admin to add you first.');
         }
       } else {
-        const memberData = mSnapshot.docs[0].data();
+        const memberData = memberSnapshot.docs[0].data();
         if (memberData.role !== role) {
           throw new Error(`Unauthorized access as ${role}.`);
         }
