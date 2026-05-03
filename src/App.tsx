@@ -55,7 +55,7 @@ export default function App() {
       {!isAdmin && (
         <Route 
           path="/" 
-          element={user ? <MemberLayout /> : <Navigate to="/language" />}
+          element={user ? <MemberLayout /> : <Navigate to="/language" replace />}
         >
           <Route index element={<Dashboard />} />
           <Route path="add" element={<AddProduct />} />
@@ -68,7 +68,7 @@ export default function App() {
       {isAdmin && (
         <Route 
           path="/admin" 
-          element={user ? <AdminLayout /> : <Navigate to="/language" />}
+          element={user ? <AdminLayout /> : <Navigate to="/language" replace />}
         >
           <Route index element={<AdminDashboard />} />
           <Route path="members" element={<MemberManagement />} />
@@ -78,7 +78,7 @@ export default function App() {
         </Route>
       )}
 
-      <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/"} />} />
+      <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/"} replace />} />
       </Routes>
     </>
   );
