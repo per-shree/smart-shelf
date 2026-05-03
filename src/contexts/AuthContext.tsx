@@ -18,14 +18,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
+import { hashPassword } from '../lib/utils';
 
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<{ username: string; role: Role } | null>(null);
@@ -57,120 +52,101 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (username: string, password: string, role: Role, email?: string, isOtpVerified?: boolean): Promise<{ requiresOtp: boolean, email?: string } | void> => {
+  const login = async (username: string, password: string, role: Role, shelfAdmin?: string, email?: string, isOtpVerified?: boolean): Promise<{ requiresOtp: boolean, email?: string } | void> => {
     setIsLoading(true);
     const fridgePath = 'fridges';
     try {
       const hashedPassword = await hashPassword(password);
       const fridgesRef = collection(db, fridgePath);
-      const q = query(fridgesRef, where('passwordHash', '==', hashedPassword));
       
-      let querySnapshot;
-      try {
-        querySnapshot = await getDocs(q);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.LIST, fridgePath);
-        return; // Should not reach here
-      }
+      let currentFridge: Fridge | null = null;
 
-      if (role === Role.Admin && !isOtpVerified) {
-        setIsLoading(false);
-        // Find the fridge by username and password
+      if (role === Role.Admin) {
+        // Admin logs in with their own username and password
         const q = query(fridgesRef, where('adminUsername', '==', username), where('passwordHash', '==', hashedPassword));
         const snap = await getDocs(q);
         
         if (snap.empty) {
-          // If it's not a registration attempt, throw error
-          if (!email) {
-            throw new Error('Admin credentials incorrect. Please check your username and password.');
+          // Check if this is a registration attempt (email provided)
+          if (email && isOtpVerified) {
+            const newFridge = {
+              passwordHash: hashedPassword,
+              memberPasswordHash: hashedPassword, // Default member password same as admin for new setup
+              adminUsername: username,
+              adminEmail: email,
+              createdAt: new Date().toISOString(),
+            };
+            const docRef = await addDoc(fridgesRef, newFridge);
+            currentFridge = { id: docRef.id, ...newFridge };
+          } else if (email) {
+            // Need OTP verification
+            return { requiresOtp: true, email };
+          } else {
+            throw new Error('Admin credentials incorrect.');
           }
-          // If registration, we can proceed to send OTP to the provided email
-          return { requiresOtp: true, email: email };
+        } else {
+          const fridgeDoc = snap.docs[0];
+          currentFridge = { id: fridgeDoc.id, ...fridgeDoc.data() as Fridge };
+          
+          if (!isOtpVerified) {
+            return { requiresOtp: true, email: currentFridge.adminEmail };
+          }
+        }
+      } else {
+        // Member logs in with: Member Username, Shelf Admin's Username, and Member Password
+        if (!shelfAdmin) throw new Error('Please provide the Admin Username for your shelf.');
+        
+        const q = query(fridgesRef, where('adminUsername', '==', shelfAdmin));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+          throw new Error('Shelf not found. Check the Admin Username.');
         }
         
         const fridgeData = snap.docs[0].data() as Fridge;
-        return { requiresOtp: true, email: fridgeData.adminEmail };
-      }
-
-      let currentFridge: Fridge;
-
-      if (querySnapshot.empty) {
-        // Create new fridge if Admin (and OTP is verified)
-        if (role === Role.Admin && isOtpVerified) {
-          const newFridge = {
-            passwordHash: hashedPassword,
-            adminUsername: username,
-            adminEmail: email || '',
-            createdAt: new Date().toISOString(),
-          };
-          try {
-            const docRef = await addDoc(fridgesRef, newFridge);
-            currentFridge = { id: docRef.id, ...newFridge };
-          } catch (error) {
-            handleFirestoreError(error, OperationType.CREATE, fridgePath);
-            return;
-          }
-        } else {
-          setIsLoading(false);
-          throw new Error('Refrigerator not found or unauthorized access.');
+        const fridgeId = snap.docs[0].id;
+        
+        // Check password against memberPasswordHash (fallback to passwordHash if not set)
+        const targetHash = fridgeData.memberPasswordHash || fridgeData.passwordHash;
+        if (hashedPassword !== targetHash) {
+          throw new Error('Incorrect shelf password.');
         }
-      } else {
-        const fridgeDoc = querySnapshot.docs[0];
-        const fData = fridgeDoc.data() as Fridge;
-        currentFridge = { id: fridgeDoc.id, ...fData };
+        
+        currentFridge = { id: fridgeId, ...fridgeData };
       }
 
-      // Check if user is already a member
+      if (!currentFridge) throw new Error('Authentication failed.');
+
+      // Verify membership
       const memberPath = `fridges/${currentFridge.id}/members`;
       const membersRef = collection(db, memberPath);
       const mq = query(membersRef, where('username', '==', username));
-      
-      let mSnapshot;
-      try {
-        mSnapshot = await getDocs(mq);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.LIST, memberPath);
-        return;
-      }
-
-      let finalRole = role;
+      const mSnapshot = await getDocs(mq);
 
       if (mSnapshot.empty) {
-        if (currentFridge.adminUsername === username) {
-          if (role !== Role.Admin) {
-            setIsLoading(false);
-            throw new Error('Please select your correct role.');
-          }
-          try {
-            await addDoc(membersRef, {
-              username,
-              role: Role.Admin,
-              joinedAt: new Date().toISOString(),
-            });
-            finalRole = Role.Admin;
-          } catch (error) {
-            handleFirestoreError(error, OperationType.CREATE, memberPath);
-            return;
-          }
+        if (role === Role.Admin) {
+          // Auto-add admin as member if first time
+          await addDoc(membersRef, {
+            username,
+            role: Role.Admin,
+            joinedAt: new Date().toISOString(),
+          });
         } else {
-          setIsLoading(false);
           throw new Error('Member not found. Please contact your admin to add you first.');
         }
       } else {
         const memberData = mSnapshot.docs[0].data();
         if (memberData.role !== role) {
-          setIsLoading(false);
-          throw new Error('Please select your correct role.');
+          throw new Error(`Unauthorized access as ${role}.`);
         }
-        finalRole = memberData.role;
       }
 
-      const userData = { username, role: finalRole };
+      const userData = { username, role };
       setUser(userData);
       setFridge(currentFridge);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('fridgeId', currentFridge.id);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       throw error;
     } finally {

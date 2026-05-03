@@ -10,7 +10,8 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+   const [username, setUsername] = useState('');
+  const [shelfAdmin, setShelfAdmin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await login(username, password, Role.Member);
+      await login(username, password, Role.Member, shelfAdmin);
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Login failed');
@@ -40,8 +41,8 @@ export default function LoginPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-primary)] opacity-20" />
         
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#5A5A40]/20">
-            <Shield size={32} />
+          <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold font-display text-[var(--color-text-main)]">
             {t('login_title')}
@@ -62,6 +63,19 @@ export default function LoginPage() {
                   placeholder={t('username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
+                  required
+                />
+            </div>
+            <div className="relative">
+              <Shield className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
+                <input
+                  type="text"
+                  id="shelfAdmin"
+                  name="shelfAdmin"
+                  placeholder="Shelf Admin Username"
+                  value={shelfAdmin}
+                  onChange={(e) => setShelfAdmin(e.target.value)}
                   className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
                   required
                 />

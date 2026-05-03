@@ -29,8 +29,8 @@ export default function LanguagePage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full glass p-10 rounded-3xl shadow-xl text-center"
       >
-        <div className="w-16 h-16 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-[#5A5A40]/10">
-          <Languages size={32} />
+        <div className="w-20 h-20 mx-auto mb-8 flex items-center justify-center overflow-hidden">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-3xl font-bold mb-10 font-display text-[var(--color-text-main)]">{t('language_selection')}</h1>
         <div className="space-y-4">

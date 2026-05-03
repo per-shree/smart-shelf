@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Product, Role } from '../types';
-import { Trash2, Search, ShoppingCart, Leaf, Clock, AlertCircle, BarChart3, TrendingUp, Edit2, Plus, X, Image as ImageIcon } from 'lucide-react';
+import { Product, Role, Status } from '../types';
+import { Trash2, Search, ShoppingCart, Leaf, Clock, AlertCircle, BarChart3, TrendingUp, Edit2, Plus, X, Image as ImageIcon, Bot, Sparkles } from 'lucide-react';
 import { cn, formatDate, getStatus } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
+import AIChatModal from '../components/AIChatModal';
 
 export default function AdminDashboard() {
   const { fridge, user } = useAuth();
@@ -17,6 +19,7 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState<any>('all');
   const [sortBy, setSortBy] = useState<'expiry' | 'qty' | 'added'>('expiry');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     if (!fridge) return;
@@ -112,49 +115,46 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)] via-orange-500 to-red-500 opacity-10 blur-3xl" />
-        <div className="relative bg-gradient-to-r from-[var(--color-primary)]/90 to-orange-600/90 rounded-[2.5rem] p-8 md:p-12 text-white shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-black font-display tracking-tight">
-                Admin Dashboard 🔧
-              </h1>
-              <p className="text-white/80 text-lg font-medium">
-                Manage your fridge inventory and monitor stock levels
-              </p>
-              <p className="text-xs text-white/60 font-mono">
-                Last updated: {new Date().toLocaleTimeString()}
-              </p>
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)] to-[#7A7A5D] opacity-10 blur-2xl" />
+        <div className="relative bg-[var(--color-card-bg)] rounded-[2.5rem] p-8 md:p-12 border border-[var(--color-border-subtle)] shadow-xs overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            
+            {/* Brand & Title Section */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 flex items-center justify-center overflow-hidden bg-[var(--color-background-base)] rounded-2xl p-2 border border-[var(--color-border-subtle)]">
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text-main)] tracking-tight">
+                    Admin Dashboard
+                  </h1>
+                  <p className="text-[var(--color-text-muted)] font-medium">
+                    Manage and monitor your smart refrigerator inventory
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-2">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20"
-              >
-                <p className="text-3xl font-black">{products.length}</p>
-                <p className="text-xs text-white/70 mt-1">Total Items</p>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="bg-green-400/20 backdrop-blur-sm rounded-2xl p-4 border border-green-400/30"
-              >
-                <p className="text-3xl font-black">{freshProducts}</p>
-                <p className="text-xs text-white/70 mt-1">Fresh</p>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="bg-yellow-400/20 backdrop-blur-sm rounded-2xl p-4 border border-yellow-400/30"
-              >
-                <p className="text-3xl font-black">{expiringSoon}</p>
-                <p className="text-xs text-white/70 mt-1">Expiring Soon</p>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="bg-red-400/20 backdrop-blur-sm rounded-2xl p-4 border border-red-400/30"
-              >
-                <p className="text-3xl font-black">{expired}</p>
-                <p className="text-xs text-white/70 mt-1">Expired</p>
-              </motion.div>
+
+            {/* Sober Stat Grid */}
+            <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+              {[
+                { label: 'Total Items', val: products.length, icon: BarChart3, color: 'var(--color-primary)' },
+                { label: 'Fresh', val: freshProducts, icon: Leaf, color: '#2E7D32' },
+                { label: 'Expiring', val: expiringSoon, icon: Clock, color: '#E65100' },
+                { label: 'Expired', val: expired, icon: AlertCircle, color: '#C62828' }
+              ].map((stat, i) => (
+                <div 
+                  key={i}
+                  className="bg-[var(--color-background-base)] rounded-2xl p-4 border border-[var(--color-border-subtle)] flex flex-col justify-between"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <stat.icon size={18} style={{ color: stat.color }} />
+                    <span className="text-2xl font-black text-[var(--color-text-main)]">{stat.val}</span>
+                  </div>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest font-bold">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -172,14 +172,14 @@ export default function AdminDashboard() {
           <input 
             type="text" 
             placeholder="Search products by name or category..."
-            className="w-full pl-12 pr-4 py-3 border-2 border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] transition-all"
+            className="w-full pl-12 pr-4 py-3 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-base)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] transition-all placeholder:text-[var(--color-text-muted)]/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
         <select 
-          className="px-6 py-3 border-2 border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium focus:outline-none focus:border-[var(--color-primary)] transition-all"
+          className="px-6 py-3 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-base)] text-[var(--color-text-main)] font-medium focus:outline-none focus:border-[var(--color-primary)] transition-all"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
         </select>
 
         <select 
-          className="px-6 py-3 border-2 border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium focus:outline-none focus:border-[var(--color-primary)] transition-all"
+          className="px-6 py-3 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-base)] text-[var(--color-text-main)] font-medium focus:outline-none focus:border-[var(--color-primary)] transition-all"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as any)}
         >
@@ -218,9 +218,9 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 md:p-8">
           <AnimatePresence mode="popLayout">
             {filteredProducts.length === 0 ? (
-              <div className="col-span-full p-12 text-center bg-[var(--color-background-base)] rounded-3xl border border-dashed border-[var(--color-border-subtle)]">
-                <AlertCircle size={48} className="mx-auto text-[var(--color-text-muted)] mb-4 opacity-50" />
-                <p className="text-[var(--color-text-muted)] text-lg font-medium">No products found</p>
+              <div className="col-span-full p-16 text-center bg-[var(--color-background-base)] rounded-[3rem] border border-dashed border-[var(--color-border-subtle)] space-y-4">
+                <AlertCircle size={64} className="mx-auto text-[var(--color-text-muted)] opacity-20" />
+                <p className="text-[var(--color-text-main)] text-xl font-bold font-display">No products found</p>
               </div>
             ) : (
               filteredProducts.map((p) => {
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-[var(--color-background-base)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden flex flex-col group relative"
+                    className="bg-[var(--color-card-bg)] rounded-[2.5rem] border border-[var(--color-border-subtle)] shadow-xs overflow-hidden flex flex-col group relative hover:shadow-md transition-all duration-300"
                   >
                     {/* Image Header */}
                     <div className="h-56 relative bg-[var(--color-card-bg)] border-b border-[var(--color-border-subtle)]">
@@ -404,6 +404,22 @@ export default function AdminDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Globally Fixed AI Assistant Button - Positioned to the right */}
+      <div className="fixed bottom-24 md:bottom-10 right-6 md:right-10 z-50 px-4 w-auto min-w-[200px]">
+        <button 
+          onClick={() => setIsChatOpen(true)}
+          className="w-full flex items-center justify-center gap-3 py-4 px-8 rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-card-bg)] shadow-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all group scale-90 md:scale-100 backdrop-blur-xl"
+        >
+          <div className="relative">
+            <Bot size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+          </div>
+          <span className="uppercase text-[10px] font-black tracking-[0.2em] whitespace-nowrap">{t('ai_assistant')}</span>
+          <Sparkles size={14} className="opacity-50 group-hover:opacity-100" />
+        </button>
+      </div>
+
+      <AIChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 }

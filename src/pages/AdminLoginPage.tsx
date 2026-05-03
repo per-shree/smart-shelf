@@ -118,8 +118,8 @@ export default function AdminLoginPage() {
         )}
 
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#5A5A40]/20">
-            {showOtp ? <KeyRound size={32} /> : <Shield size={32} />}
+          <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold font-display text-[var(--color-text-main)]">
             {showOtp ? "Verify OTP" : (isRegister ? t('setup_fridge') : 'Admin Login')}

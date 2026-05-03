@@ -4,15 +4,18 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Member, Role } from '../types';
-import { UserPlus, UserMinus, Shield, User, Loader2 } from 'lucide-react';
+import { UserPlus, UserMinus, Shield, User, Loader2, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
-import { cn, formatDate } from '../lib/utils';
+import { cn, formatDate, hashPassword } from '../lib/utils';
+import { updateDoc, doc as firestoreDoc } from 'firebase/firestore';
 
 export default function MemberManagement() {
   const { fridge, user } = useAuth();
   const { t } = useTranslation();
   const [members, setMembers] = useState<Member[]>([]);
   const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberPassword, setNewMemberPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -42,10 +45,24 @@ export default function MemberManagement() {
     }
   };
 
-  const handleRemoveMember = async (id: string) => {
-    if (!fridge || user?.role !== Role.Admin) return;
-    const memberRef = doc(db, `fridges/${fridge.id}/members`, id);
-    await deleteDoc(memberRef);
+  const handleUpdateMemberPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fridge || !newMemberPassword || user?.role !== Role.Admin) return;
+    setIsUpdatingPassword(true);
+    try {
+      const hashedPassword = await hashPassword(newMemberPassword);
+      const fridgeRef = firestoreDoc(db, 'fridges', fridge.id);
+      await updateDoc(fridgeRef, {
+        memberPasswordHash: hashedPassword
+      });
+      setNewMemberPassword('');
+      alert('Member password updated successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   };
 
   const isAdmin = user?.role === Role.Admin;
@@ -71,7 +88,7 @@ export default function MemberManagement() {
                 placeholder={t('new_member_placeholder')}
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
-                className="w-full pl-12 pr-6 py-3.5 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] text-sm font-medium shadow-xs"
+                className="w-full pl-12 pr-6 py-3.5 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-base)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] text-sm font-medium shadow-xs placeholder:text-[var(--color-text-muted)]/50"
               />
             </div>
             <button 
@@ -83,6 +100,64 @@ export default function MemberManagement() {
               <span className="uppercase tracking-widest text-[10px] font-black">{t('add')}</span>
             </button>
           </form>
+        </motion.div>
+      )}
+
+      {/* Shelf Access Credentials Section */}
+      {isAdmin && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[var(--color-card-bg)] p-8 rounded-[2.5rem] border border-[var(--color-primary)]/10 shadow-sm space-y-6"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[var(--color-primary)]/10 rounded-lg text-[var(--color-primary)]">
+              <Shield size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-[var(--color-text-main)] font-display">Shelf Access Settings</h3>
+              <p className="text-xs text-[var(--color-text-muted)]">Define how members login to this shelf.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Shelf ID (Admin Username) */}
+            <div className="p-5 bg-[var(--color-background-base)] rounded-2xl border border-[var(--color-border-subtle)]/50 space-y-2">
+              <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Admin Username (Shelf ID)</p>
+              <div className="flex items-center justify-between">
+                <code className="text-sm font-bold text-[var(--color-primary)]">{fridge?.adminUsername}</code>
+                <p className="text-[9px] text-[var(--color-text-muted)] italic">Members use this as 'Shelf Admin'</p>
+              </div>
+            </div>
+
+            {/* Set Member Password */}
+            <form onSubmit={handleUpdateMemberPassword} className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Member Password</p>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={16} />
+                  <input
+                    type="password"
+                    placeholder="Set shared member password"
+                    value={newMemberPassword}
+                    onChange={(e) => setNewMemberPassword(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-background-base)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] text-sm font-medium"
+                  />
+                </div>
+              </div>
+              <button 
+                type="submit"
+                disabled={isUpdatingPassword || !newMemberPassword}
+                className="w-full py-3 bg-[var(--color-primary)] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-md shadow-[#5A5A40]/20"
+              >
+                {isUpdatingPassword ? 'Updating...' : 'Update Member Password'}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-[10px] text-[var(--color-text-muted)] text-center leading-relaxed">
+            <span className="font-bold text-[var(--color-primary)]">Note:</span> Members will need both your <span className="underline">Admin Username</span> and this <span className="underline">Member Password</span> to login to this refrigerator.
+          </p>
         </motion.div>
       )}
 

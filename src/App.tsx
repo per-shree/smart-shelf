@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import Dashboard from './pages/Dashboard';
 import AddProduct from './pages/AddProduct';
-import AIAssistant from './pages/AIAssistant';
 import ShoppingList from './pages/ShoppingList';
 import MemberManagement from './pages/MemberManagement';
 import Settings from './pages/Settings';
@@ -52,7 +51,6 @@ export default function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="add" element={<AddProduct />} />
-          <Route path="ai" element={<AIAssistant />} />
           <Route path="shopping-list" element={<ShoppingList />} />
           <Route path="settings" element={<Settings />} />
         </Route>
@@ -65,7 +63,6 @@ export default function App() {
           element={user ? <AdminLayout /> : <Navigate to="/language" />}
         >
           <Route index element={<AdminDashboard />} />
-          <Route path="ai" element={<AIAssistant />} />
           <Route path="members" element={<MemberManagement />} />
           <Route path="shopping-list" element={<ShoppingList />} />
           <Route path="settings" element={<Settings />} />
@@ -97,12 +94,6 @@ function MemberLayout() {
       label: t('add_product'), 
       icon: Plus, 
       path: '/add',
-    },
-    { 
-      id: 'ai', 
-      label: t('ai_assistant'), 
-      icon: Sparkles, 
-      path: '/ai',
     },
     { 
       id: 'shopping-list', 
@@ -209,12 +200,6 @@ function AdminLayout() {
       label: t('dashboard'), 
       icon: BarChart3, 
       path: '/admin',
-    },
-    { 
-      id: 'ai', 
-      label: t('ai_assistant'), 
-      icon: Sparkles, 
-      path: '/admin/ai',
     },
     { 
       id: 'shopping-list', 

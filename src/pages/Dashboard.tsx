@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Product, Status } from '../types';
-import { Trash2, Search, Filter, ArrowUpDown, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Search, Filter, ArrowUpDown, Image as ImageIcon, Bot, Sparkles, AlertCircle } from 'lucide-react';
 import { cn, formatDate, getStatus } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
+import AIChatModal from '../components/AIChatModal';
 
 export default function Dashboard() {
   const { fridge, user } = useAuth();
@@ -16,6 +18,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<Status | 'all'>('all');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     if (!fridge) return;
@@ -65,7 +68,12 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold font-sans">{t('dashboard')}</h2>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+          </div>
+          <h2 className="text-2xl font-bold font-sans">{t('dashboard')}</h2>
+        </div>
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-2.5 text-zinc-400" size={18} />
@@ -181,11 +189,28 @@ export default function Dashboard() {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="p-12 text-center text-[var(--color-text-muted)] italic text-sm">
-            {t('no_products')}
+          <div className="p-16 text-center space-y-4">
+            <AlertCircle size={64} className="mx-auto text-[var(--color-text-muted)] opacity-20" />
+            <p className="text-[var(--color-text-main)] text-xl font-bold font-display">{t('no_products')}</p>
           </div>
         )}
       </div>
+      {/* Globally Fixed AI Assistant Button - Positioned to the right */}
+      <div className="fixed bottom-24 md:bottom-10 right-6 md:right-10 z-50 px-4 w-auto min-w-[200px]">
+        <button 
+          onClick={() => setIsChatOpen(true)}
+          className="w-full flex items-center justify-center gap-3 py-4 px-8 rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-card-bg)] shadow-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all group scale-90 md:scale-100 backdrop-blur-xl"
+        >
+          <div className="relative">
+            <Bot size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+          </div>
+          <span className="uppercase text-[10px] font-black tracking-[0.2em] whitespace-nowrap">{t('ai_assistant')}</span>
+          <Sparkles size={14} className="opacity-50 group-hover:opacity-100" />
+        </button>
+      </div>
+
+      <AIChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 }

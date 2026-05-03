@@ -43,6 +43,7 @@ export interface ShoppingItem {
 export interface Fridge {
   id: string;
   passwordHash: string;
+  memberPasswordHash?: string; // New field for members
   adminUsername: string;
   adminEmail?: string;
   createdAt: string;

@@ -40,8 +40,8 @@ export default function Layout() {
               <Menu size={24} />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center text-white shadow-sm">
-                <Refrigerator size={18} />
+              <div className="w-8 h-8 flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <span className="font-display font-bold text-lg text-[var(--color-primary)] tracking-tight">{t('app_title')}</span>
             </div>

@@ -29,7 +29,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t('dashboard') },
     { to: '/add', icon: PlusCircle, label: t('add_product') },
-    { to: '/ai', icon: Bot, label: t('ai_assistant') },
     { to: '/shopping-list', icon: ShoppingCart, label: t('shopping_list') },
     { to: '/members', icon: Users, label: t('members_mgmt') },
     { to: '/settings', icon: Settings, label: t('settings') },
@@ -44,9 +43,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         >
           <X size={20} />
         </button>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[var(--color-primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#5A5A40]/20">
-            <Refrigerator size={24} />
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <span className="font-bold text-2xl font-display text-[var(--color-primary)] tracking-tight">{t('app_title')}</span>
         </div>

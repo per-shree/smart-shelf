@@ -293,7 +293,7 @@ export default function Settings() {
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={handleExport}
-                  className="w-full btn-primary group overflow-hidden"
+                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-base)] hover:bg-[var(--color-border-subtle)] transition-colors text-[var(--color-text-main)] group"
                 >
                   <div className="flex items-center justify-center gap-3 relative">
                     <Download size={16} />
