@@ -161,6 +161,44 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
               {/* Input Area */}
               <div className="p-6 bg-[var(--color-background-base)] border-t border-[var(--color-border-subtle)]">
                 <div className="relative">
+                  {/* Dynamic Typing Suggestions */}
+                  <AnimatePresence>
+                    {prompt.trim() && !loading && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-full left-0 w-full mb-3 flex flex-wrap gap-2 pointer-events-auto"
+                      >
+                        {[
+                          "What can I cook with my expiring eggs?",
+                          "How much money am I wasting this week?",
+                          "Give me a health score for my fridge.",
+                          "Suggest a high-protein meal from my stock.",
+                          "Which items should I use first to avoid waste?",
+                          "Create a shopping list for next week.",
+                          "How do I store spinach to keep it fresh longer?",
+                          "Plan a 3-course dinner with current items.",
+                          "What's the carbon footprint of my shelf?",
+                          "Analyze my nutritional balance this month."
+                        ].filter(s => s.toLowerCase().includes(prompt.toLowerCase()))
+                         .slice(0, 3)
+                         .map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setPrompt(suggestion);
+                              handleAsk(suggestion);
+                            }}
+                            className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-[var(--color-primary)]/20 hover:bg-[var(--color-primary)] hover:text-white transition-all backdrop-blur-md shadow-sm"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <textarea
                     rows={2}
                     className="w-full p-4 pr-16 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] resize-none text-sm leading-relaxed shadow-xs placeholder:text-[var(--color-text-muted)]/50"
