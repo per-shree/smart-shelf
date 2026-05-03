@@ -15,7 +15,7 @@ interface AIChatModalProps {
 }
 
 export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
-  const { fridge, language } = useAuth();
+  const { fridge, user, language } = useAuth();
   const { t } = useTranslation();
   const [inventory, setInventory] = useState<Product[]>([]);
   const [prompt, setPrompt] = useState('');
@@ -46,7 +46,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     
     setLoading(true);
     setResponse('');
-    const aiRes = await getAIResponse(queryText, inventory, language);
+    const aiRes = await getAIResponse(queryText, inventory, fridge?.id || '', user?.username || '', language);
     const cleanRes = aiRes.replace(/[\*#_~`]/g, '');
     setResponse(cleanRes);
     setLoading(false);

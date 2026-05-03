@@ -113,10 +113,10 @@ export default function ActivityLogs() {
                             {log.action}
                           </span>
                         </td>
-                        <td className="px-8 py-5">
-                          <div className="flex items-center gap-2 text-[var(--color-text-muted)] text-sm">
-                            <Info size={16} className="shrink-0" />
-                            <span>{log.details}</span>
+                        <td className="px-8 py-5 max-w-md">
+                          <div className="flex items-start gap-2 text-[var(--color-text-muted)] text-sm">
+                            <Info size={16} className="shrink-0 mt-1" />
+                            <span className="break-words">{log.details}</span>
                           </div>
                         </td>
                       </motion.tr>

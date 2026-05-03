@@ -9,7 +9,7 @@ import { getAIResponse } from '../services/aiService';
 import { Product } from '../types';
 
 export default function AIAssistant() {
-  const { fridge, language } = useAuth();
+  const { fridge, user, language } = useAuth();
   const { t } = useTranslation();
   const [inventory, setInventory] = useState<Product[]>([]);
   const [prompt, setPrompt] = useState('');
@@ -40,7 +40,7 @@ export default function AIAssistant() {
     
     setLoading(true);
     setResponse('');
-    const aiRes = await getAIResponse(queryText, inventory, language);
+    const aiRes = await getAIResponse(queryText, inventory, fridge?.id || '', user?.username || '', language);
     // Clean response of common markdown symbols just in case
     const cleanRes = aiRes.replace(/[\*#_~`]/g, '');
     setResponse(cleanRes);

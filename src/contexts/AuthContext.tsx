@@ -5,13 +5,14 @@ import { Fridge, Member, Role } from '../types';
 import i18n from '../i18n';
 
 interface AuthContextType {
-  user: { username: string; role: Role } | null;
+  user: { username: string; role: Role; email?: string } | null;
   fridge: Fridge | null;
   language: string;
   setLanguage: (lang: string) => void;
   login: (username: string, password: string, role: Role, email?: string, isOtpVerified?: boolean) => Promise<{ requiresOtp: boolean, email?: string } | void>;
+  registerMember: (username: string, password: string, shelfCode: string, email: string) => Promise<void>;
   logout: () => void;
-  updateUser: (newUsername: string) => Promise<void>;
+  updateUser: (newUsername: string, newEmail: string) => Promise<void>;
   isLoading: boolean;
   setIsGlobalLoading: (loading: boolean) => void;
   isGlobalLoading: boolean;
@@ -20,13 +21,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
-import { hashPassword } from '../lib/utils';
+import { hashPassword, generateShelfCode } from '../lib/utils';
 import { emailService } from '../services/emailService';
+import { activityService, ActivityAction } from '../services/activityService';
 
 
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<{ username: string; role: Role } | null>(null);
+  const [user, setUser] = useState<{ username: string; role: Role; email?: string } | null>(null);
   const [fridge, setFridge] = useState<Fridge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
@@ -46,9 +48,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fetchFridge = async () => {
         const fridgePath = `fridges/${savedFridgeId}`;
         const fridgeRef = doc(db, fridgePath);
-        onSnapshot(fridgeRef, (docSnap) => {
+        onSnapshot(fridgeRef, async (docSnap) => {
           if (docSnap.exists()) {
-            setFridge({ id: docSnap.id, ...docSnap.data() } as Fridge);
+            const data = docSnap.data() as Fridge;
+            // Self-healing for old fridges missing a shelf code
+            if (!data.shelfCode) {
+              const newCode = generateShelfCode();
+              await updateDoc(fridgeRef, { shelfCode: newCode });
+              setFridge({ id: docSnap.id, ...data, shelfCode: newCode });
+            } else {
+              setFridge({ id: docSnap.id, ...data });
+            }
           }
           setIsLoading(false);
         }, (error) => {
@@ -84,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               memberPasswordHash: hashedPassword, // Default member password same as admin for new setup
               adminUsername: username,
               adminEmail: email,
+              shelfCode: generateShelfCode(),
               createdAt: new Date().toISOString(),
             };
             const docRef = await addDoc(fridgesRef, newFridge);
@@ -96,7 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } else {
           const fridgeDoc = snap.docs[0];
-          currentFridge = { id: fridgeDoc.id, ...fridgeDoc.data() as Fridge };
+          const data = fridgeDoc.data() as Fridge;
+          currentFridge = { id: fridgeDoc.id, ...data };
+          
+          // Self-healing for existing fridges
+          if (!currentFridge.shelfCode) {
+            const newCode = generateShelfCode();
+            await updateDoc(fridgeDoc.ref, { shelfCode: newCode });
+            currentFridge.shelfCode = newCode;
+          }
           
           if (!isOtpVerified) {
             return { requiresOtp: true, email: currentFridge.adminEmail };
@@ -104,36 +123,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // Member logs in with: Member Username and Member Password
-        // Search for all fridges that match this password (either as member password or admin password fallback)
-        const q1 = query(fridgesRef, where('memberPasswordHash', '==', hashedPassword));
-        const q2 = query(fridgesRef, where('passwordHash', '==', hashedPassword));
-        
-        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-        const allPotentialFridges = [...snap1.docs, ...snap2.docs];
+        // Search for all fridges to find where this user is a member with this password
+        const fridgesSnap = await getDocs(fridgesRef);
+        const matches: { fridgeDoc: any; memberSnap: any }[] = [];
 
-        if (allPotentialFridges.length === 0) {
-          throw new Error('Incorrect password or shelf not found.');
-        }
-
-        // Now find the one where this user is actually a member - Parallelized for speed
-        const membershipChecks = allPotentialFridges.map(async (fDoc) => {
+        await Promise.all(fridgesSnap.docs.map(async (fDoc) => {
           const mRef = collection(db, `fridges/${fDoc.id}/members`);
-          const mq = query(mRef, where('username', '==', username));
+          const mq = query(mRef, where('username', '==', username), where('passwordHash', '==', hashedPassword));
           const mSnap = await getDocs(mq);
-          return { fDoc, mSnap, hasMember: !mSnap.empty };
-        });
+          if (!mSnap.empty) {
+            matches.push({ fridgeDoc: fDoc, memberSnap: mSnap });
+          }
+        }));
 
-        const results = await Promise.all(membershipChecks);
-        const match = results.find(r => r.hasMember);
-        
-        if (match) {
-          currentFridge = { id: match.fDoc.id, ...match.fDoc.data() as Fridge };
-          memberSnapshot = match.mSnap;
+        if (matches.length === 0) {
+          throw new Error('Incorrect username or password.');
         }
-        
-        if (!currentFridge) {
-          throw new Error('You are not a member of this shelf. Please contact your admin.');
-        }
+
+        const firstMatch = matches[0];
+        currentFridge = { id: firstMatch.fridgeDoc.id, ...firstMatch.fridgeDoc.data() as Fridge };
+        memberSnapshot = firstMatch.memberSnap;
       }
 
       if (!currentFridge) throw new Error('Authentication failed.');
@@ -166,15 +175,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      const userData = { username, role };
+      let userEmail = '';
+      if (role === Role.Admin) {
+        userEmail = currentFridge.adminEmail || '';
+      } else if (!memberSnapshot.empty) {
+        const mData = memberSnapshot.docs[0].data() as Member;
+        userEmail = mData.email || '';
+      }
+
+      const userData = { username, role, email: userEmail };
       setUser(userData);
       setFridge(currentFridge);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('fridgeId', currentFridge.id);
 
-      // Send Login Alert to Admin & Member
-      console.log(`[Auth] User logged in: ${username} (${role}). Checking for alert emails...`);
-      
+      // Log Activity
+      await activityService.log(currentFridge.id, username, ActivityAction.LOGIN, `${username} logged in as ${role}`);
+
       if (currentFridge.adminEmail) {
         console.log(`[Auth] Sending alert to Admin: ${currentFridge.adminEmail}`);
         emailService.sendLoginAlert(currentFridge.adminEmail, username, role);
@@ -206,6 +223,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const registerMember = async (username: string, password: string, shelfCode: string, email: string) => {
+    setIsLoading(true);
+    try {
+      const hashedPassword = await hashPassword(password);
+      const fridgesRef = collection(db, 'fridges');
+      
+      // Find the fridge by shelf code
+      const q = query(fridgesRef, where('shelfCode', '==', shelfCode));
+      const fridgeSnap = await getDocs(q);
+      
+      if (fridgeSnap.empty) {
+        throw new Error('Invalid Shelf Code. Please ask your admin for the correct code.');
+      }
+      
+      const fridgeDoc = fridgeSnap.docs[0];
+      
+      // Check if user already exists in this fridge
+      const membersRef = collection(db, `fridges/${fridgeDoc.id}/members`);
+      const mq = query(membersRef, where('username', '==', username));
+      const mSnap = await getDocs(mq);
+      
+      if (!mSnap.empty) {
+        throw new Error('Username already taken in this shelf. Please choose another.');
+      }
+      
+      const fridgeData = fridgeDoc.data() as Fridge;
+      
+      // Add new member
+      await addDoc(membersRef, {
+        fridgeId: fridgeDoc.id,
+        username,
+        email,
+        passwordHash: hashedPassword,
+        role: Role.Member,
+        joinedAt: new Date().toISOString(),
+      });
+      
+      // Log Activity
+      await activityService.log(fridgeDoc.id, username, ActivityAction.REGISTER, `${username} registered as a new member`);
+      
+      // Auto-login
+      const userData = { username, role: Role.Member, email };
+      setUser(userData);
+      setFridge({ id: fridgeDoc.id, ...fridgeData });
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('fridgeId', fridgeDoc.id);
+      
+      // Send alert to admin if email exists
+      if (fridgeData.adminEmail) {
+        emailService.sendLoginAlert(fridgeData.adminEmail, username, Role.Member);
+      }
+      
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setFridge(null);
@@ -213,7 +290,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('fridgeId');
   };
 
-  const updateUser = async (newUsername: string) => {
+  const updateUser = async (newUsername: string, newEmail: string) => {
     if (!user || !fridge) return;
     
     const memberPath = `fridges/${fridge.id}/members`;
@@ -225,13 +302,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!mSnapshot.empty) {
         const memberDoc = mSnapshot.docs[0];
         await updateDoc(doc(db, memberPath, memberDoc.id), {
-          username: newUsername
+          username: newUsername,
+          email: newEmail
         });
       }
       
-      const updatedUser = { ...user, username: newUsername };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // If Admin, also update the fridge's adminEmail
+      if (user.role === Role.Admin) {
+        await updateDoc(doc(db, 'fridges', fridge.id), {
+          adminEmail: newEmail
+        });
+      }
+
+      const newUser = { ...user, username: newUsername, email: newEmail };
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
     } catch (error) {
       console.error("Failed to update user profile", error);
       throw error;
@@ -251,7 +336,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, fridge, language, setLanguage, login, logout, updateUser, isLoading, isGlobalLoading, setIsGlobalLoading: triggerGlobalLoader }}>
+    <AuthContext.Provider value={{ user, fridge, language, setLanguage, login, registerMember, logout, updateUser, isLoading, isGlobalLoading, setIsGlobalLoading: triggerGlobalLoader }}>
       {children}
     </AuthContext.Provider>
   );

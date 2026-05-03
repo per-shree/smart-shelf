@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Role } from '../types';
 import { motion } from 'motion/react';
 import { AlertCircle, Package, Upload, X } from 'lucide-react';
+import { activityService, ActivityAction } from '../services/activityService';
 
 const CATEGORIES = ['Vegetables', 'Fruits', 'Dairy', 'Meat', 'Beverages', 'Snacks', 'Other'];
 
@@ -74,12 +75,7 @@ export default function AddProduct() {
       
       await addDoc(productsRef, newProduct);
       
-      await addDoc(logsRef, {
-        action: t('added_product'),
-        details: `${user.username} added ${formData.quantity}x ${formData.name}`,
-        timestamp: new Date().toISOString(),
-        user: user.username
-      });
+      await activityService.log(fridge.id, user.username, ActivityAction.ADD_PRODUCT, `${user.username} added ${formData.quantity}x ${formData.name}`);
 
       setFormData({ name: '', category: 'Vegetables', expiryDate: '', quantity: 1 });
       removeImage();

@@ -8,6 +8,7 @@ import { Product, Status } from '../types';
 import { Trash2, Search, Filter, ArrowUpDown, Image as ImageIcon, Bot, Sparkles, AlertCircle } from 'lucide-react';
 import { cn, formatDate, getStatus } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { activityService, ActivityAction } from '../services/activityService';
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
 import AIChatModal from '../components/AIChatModal';
@@ -46,16 +47,7 @@ export default function Dashboard() {
       handleFirestoreError(error, OperationType.UPDATE, productPath);
     }
 
-    try {
-      await addDoc(logsRef, {
-        action: t('removed_product'),
-        details: `${user.username} removed ${name}`,
-        timestamp: new Date().toISOString(),
-        user: user.username
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, logsPath);
-    }
+    await activityService.log(fridge.id, user.username, ActivityAction.REMOVE_PRODUCT, `${user.username} removed ${name}`);
   };
 
   const filteredProducts = products.filter(p => {

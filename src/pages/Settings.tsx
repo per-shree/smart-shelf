@@ -43,9 +43,8 @@ export default function Settings() {
     if (user?.username) {
       setEditUsername(user.username);
     }
-    // Set initial email from fridge (for admin) or find member email
-    if (user?.role === 'Admin') {
-      setEditEmail(fridge?.adminEmail || '');
+    if (user?.email) {
+      setEditEmail(user.email);
     }
   }, [user, fridge]);
 

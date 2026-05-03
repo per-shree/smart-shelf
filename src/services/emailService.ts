@@ -34,7 +34,9 @@ export const emailService = {
           otp_code: otp,
           code: otp,
           from_name: "Smart Shelf Security",
-          message: `Your verification code is: ${otp}`
+          title: "Verification Code",
+          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
+          message: "Please use the code below to verify your admin account."
         }
       );
 
@@ -72,17 +74,57 @@ export const emailService = {
         templateId,
         {
           to_email: targetEmail,
-          user_email: targetEmail, // Some templates use user_email
+          user_email: targetEmail,
           from_name: "Smart Shelf Security",
+          title: "Security Alert",
+          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
           login_user: loginUser,
           role: role,
           time: new Date().toLocaleString(),
-          message: `Alert: A new login was detected on your Smart Shelf.\n\nUser: ${loginUser}\nRole: ${role}\nTime: ${new Date().toLocaleString()}\n\nIf this wasn't you or an authorized member, please change your shelf password immediately.`
+          message: `A new login was detected on your Smart Shelf account. Please review the details below.`
         }
       );
       console.log('[EmailService] Alert Success:', result.status, result.text);
     } catch (error: any) {
       console.error('[EmailService] Alert Delivery Failed:', error);
+    }
+  },
+
+  /**
+   * Sends a shelf invitation to a new member.
+   */
+  sendInvitation: async (targetEmail: string, shelfCode: string, adminName: string): Promise<boolean> => {
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID; // Reusing the OTP template
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    console.log(`[EmailService] Reusing OTP template for invitation to ${targetEmail}`);
+
+    if (!serviceId || serviceId === 'your_service_id') {
+      console.warn('[EmailService] EmailJS not configured.');
+      return true;
+    }
+
+    try {
+      emailjs.init(publicKey);
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          to_email: targetEmail,
+          // We map 'shelfCode' to 'otp_code' and 'code' so your existing OTP template displays it
+          otp_code: shelfCode,
+          code: shelfCode,
+          from_name: "Smart Shelf Team",
+          title: "Shelf Access Code",
+          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
+          message: `Invitation from ${adminName}: Use the code above to join their Smart Shelf household. Click the button below to register.`
+        }
+      );
+      return true;
+    } catch (error: any) {
+      console.error('[EmailService] Invitation Failed:', error);
+      throw new Error(error.text || error.message || 'Failed to send invitation');
     }
   }
 };

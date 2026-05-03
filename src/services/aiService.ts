@@ -1,8 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
+import { activityService, ActivityAction } from './activityService';
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-export async function getAIResponse(promptString: string, inventory: any[], language: string = 'en') {
+export async function getAIResponse(promptString: string, inventory: any[], fridgeId: string, username: string, language: string = 'en') {
   try {
     const inventoryContext = inventory.map(p => 
       `${p.name} (${p.category}) - Expiry: ${p.expiryDate}, Quantity: ${p.quantity}`
@@ -38,7 +40,12 @@ export async function getAIResponse(promptString: string, inventory: any[], lang
       contents: [{ parts: [{ text: fullPrompt }] }]
     });
 
-    return response.text || "I couldn't generate a response. Please try again.";
+    const resultText = response.text || "I couldn't generate a response. Please try again.";
+
+    // Log Activity
+    await activityService.log(fridgeId, username, ActivityAction.AI_CHAT, `User: ${promptString} | AI: ${resultText}`);
+
+    return resultText;
   } catch (error) {
     console.error("Gemini API Error:", error);
     return "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later.";

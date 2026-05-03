@@ -27,6 +27,7 @@ export interface Member {
   fridgeId: string;
   username: string;
   email?: string;
+  passwordHash: string;
   role: Role;
   joinedAt: string;
 }
@@ -47,6 +48,7 @@ export interface Fridge {
   memberPasswordHash?: string; // New field for members
   adminUsername: string;
   adminEmail?: string;
+  shelfCode: string;
   createdAt: string;
 }
 

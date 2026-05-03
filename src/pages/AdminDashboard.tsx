@@ -5,11 +5,13 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Product, Role, Status } from '../types';
-import { Trash2, Search, ShoppingCart, Leaf, Clock, AlertCircle, BarChart3, TrendingUp, Edit2, Plus, X, Image as ImageIcon, Bot, Sparkles } from 'lucide-react';
+import { Trash2, Search, ShoppingCart, Leaf, Clock, AlertCircle, BarChart3, TrendingUp, Edit2, Plus, X, Image as ImageIcon, Bot, Sparkles, UserPlus, Send, Mail, Loader2 } from 'lucide-react';
 import { cn, formatDate, getStatus } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
 import AIChatModal from '../components/AIChatModal';
+import { activityService, ActivityAction } from '../services/activityService';
+import { emailService } from '../services/emailService';
 
 export default function AdminDashboard() {
   const { fridge, user } = useAuth();
@@ -20,6 +22,9 @@ export default function AdminDashboard() {
   const [sortBy, setSortBy] = useState<'expiry' | 'qty' | 'added'>('expiry');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
 
   useEffect(() => {
     if (!fridge) return;
@@ -56,12 +61,7 @@ export default function AdminDashboard() {
 
     try {
       await updateDoc(productRef, { isRemoved: true });
-      await addDoc(logsRef, {
-        action: 'Removed product',
-        details: `${user.username} removed ${name}`,
-        timestamp: new Date().toISOString(),
-        user: user.username
-      });
+      await activityService.log(fridge.id, user.username, ActivityAction.REMOVE_PRODUCT, `${user.username} removed ${name}`);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, productPath);
     }
@@ -83,12 +83,7 @@ export default function AdminDashboard() {
         quantity: Number(editingProduct.quantity),
         expiryDate: editingProduct.expiryDate
       });
-      await addDoc(logsRef, {
-        action: 'Edited product',
-        details: `${user.username} edited ${editingProduct.name}`,
-        timestamp: new Date().toISOString(),
-        user: user.username
-      });
+      await activityService.log(fridge.id, user.username, ActivityAction.EDIT_PRODUCT, `${user.username} edited ${editingProduct.name}`);
       setEditingProduct(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, productPath);
@@ -132,6 +127,24 @@ export default function AdminDashboard() {
                   <p className="text-[var(--color-text-muted)] font-medium">
                     {t('admin_dashboard_desc')}
                   </p>
+                  
+                  {fridge && (
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <div className="bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 px-4 py-2.5 rounded-xl flex items-center gap-3 shadow-sm">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] opacity-70">Shelf Code</span>
+                        <span className="text-sm font-black font-mono text-[var(--color-text-main)] tracking-wider select-all bg-white/50 px-2 py-0.5 rounded border border-[var(--color-primary)]/10">{fridge.shelfCode}</span>
+                      </div>
+                      <motion.button 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsInviteModalOpen(true)}
+                        className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] hover:shadow-xl hover:shadow-[var(--color-primary)]/20 transition-all flex items-center gap-2"
+                      >
+                        <UserPlus size={14} />
+                        Invite Member
+                      </motion.button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -420,6 +433,97 @@ export default function AdminDashboard() {
       </div>
 
       <AIChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* Invite Modal */}
+      <AnimatePresence>
+        {isInviteModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-[var(--color-card-bg)] rounded-[2.5rem] p-8 max-w-md w-full shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-[var(--color-border-subtle)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-[var(--color-primary)]" />
+              
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-xl">
+                    <Mail size={20} />
+                  </div>
+                  <h3 className="text-xl font-black font-display text-[var(--color-text-main)] tracking-tight">Invite Member</h3>
+                </div>
+                <button 
+                  onClick={() => setIsInviteModalOpen(false)} 
+                  className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-background-base)] rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <p className="text-sm text-[var(--color-text-muted)] font-medium leading-relaxed">
+                  Send an email invitation to your household members. They will receive the <span className="text-[var(--color-primary)] font-bold">Shelf Code</span> needed to join this shelf.
+                </p>
+
+                <div className="bg-[var(--color-background-base)] p-5 rounded-2xl border border-[var(--color-border-subtle)] space-y-2">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Your Shelf Code</p>
+                  <p className="text-2xl font-black font-mono tracking-widest text-[var(--color-primary)]">{fridge?.shelfCode}</p>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)] ml-1">Member Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="e.g. member@example.com"
+                      value={inviteEmail}
+                      onChange={e => setInviteEmail(e.target.value)}
+                      className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-background-base)] text-[var(--color-text-main)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/10 focus:border-[var(--color-primary)] transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-2">
+                  <button 
+                    onClick={() => setIsInviteModalOpen(false)}
+                    className="flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-[var(--color-background-base)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-all border border-[var(--color-border-subtle)]"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (!inviteEmail || !fridge || !user) return;
+                      setIsInviting(true);
+                      try {
+                        await emailService.sendInvitation(inviteEmail, fridge.shelfCode, user.username);
+                        alert(`Invitation sent to ${inviteEmail}`);
+                        setIsInviteModalOpen(false);
+                        setInviteEmail('');
+                      } catch (err) {
+                        alert("Failed to send invitation. Please check your EmailJS setup.");
+                      } finally {
+                        setIsInviting(false);
+                      }
+                    }}
+                    disabled={isInviting || !inviteEmail}
+                    className="flex-1 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest bg-[var(--color-primary)] text-white hover:shadow-xl hover:shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isInviting ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
+                    {isInviting ? 'Sending...' : 'Send Invite'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
