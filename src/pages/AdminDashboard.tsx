@@ -127,10 +127,10 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold font-display text-[var(--color-text-main)] tracking-tight">
-                    Admin Dashboard
+                    {t('admin_dashboard')}
                   </h1>
                   <p className="text-[var(--color-text-muted)] font-medium">
-                    Manage and monitor your smart refrigerator inventory
+                    {t('admin_dashboard_desc')}
                   </p>
                 </div>
               </div>
@@ -139,10 +139,10 @@ export default function AdminDashboard() {
             {/* Sober Stat Grid */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-3">
               {[
-                { label: 'Total Items', val: products.length, icon: BarChart3, color: 'var(--color-primary)' },
-                { label: 'Fresh', val: freshProducts, icon: Leaf, color: '#2E7D32' },
-                { label: 'Expiring', val: expiringSoon, icon: Clock, color: '#E65100' },
-                { label: 'Expired', val: expired, icon: AlertCircle, color: '#C62828' }
+                { label: t('total_items'), val: products.length, icon: BarChart3, color: 'var(--color-primary)' },
+                { label: t('fresh'), val: freshProducts, icon: Leaf, color: '#2E7D32' },
+                { label: t('expiring'), val: expiringSoon, icon: Clock, color: '#E65100' },
+                { label: t('expired'), val: expired, icon: AlertCircle, color: '#C62828' }
               ].map((stat, i) => (
                 <div 
                   key={i}
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
           <Search className="absolute left-4 top-3.5 text-[var(--color-text-muted)]" size={20} />
           <input 
             type="text" 
-            placeholder="Search products by name or category..."
+            placeholder={t('search_placeholder')}
             className="w-full pl-12 pr-4 py-3 border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-base)] text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-primary)] transition-all placeholder:text-[var(--color-text-muted)]/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -183,10 +183,10 @@ export default function AdminDashboard() {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="all">All Status</option>
-          <option value="fresh">🟢 Fresh</option>
-          <option value="near_expiry">🟡 Expiring Soon</option>
-          <option value="expired">🔴 Expired</option>
+          <option value="all">{t('all_status')}</option>
+          <option value="fresh">🟢 {t('fresh')}</option>
+          <option value="near_expiry">🟡 {t('near_expiry')}</option>
+          <option value="expired">🔴 {t('expired')}</option>
         </select>
 
         <select 
@@ -194,9 +194,9 @@ export default function AdminDashboard() {
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as any)}
         >
-          <option value="expiry">Sort by Expiry</option>
-          <option value="qty">Sort by Quantity</option>
-          <option value="added">Recently Added</option>
+          <option value="expiry">{t('sort_by_expiry')}</option>
+          <option value="qty">{t('sort_by_qty')}</option>
+          <option value="added">{t('recently_added')}</option>
         </select>
       </motion.div>
 
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
         <div className="p-6 md:p-8 border-b border-[var(--color-background-base)]">
           <h2 className="font-black text-2xl md:text-3xl font-display text-[var(--color-text-main)] flex items-center gap-3">
             <BarChart3 size={28} className="text-[var(--color-primary)]" />
-            Inventory ({filteredProducts.length} items)
+            {t('inventory_count', { count: filteredProducts.length })}
           </h2>
         </div>
 
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
             {filteredProducts.length === 0 ? (
               <div className="col-span-full p-16 text-center bg-[var(--color-background-base)] rounded-[3rem] border border-dashed border-[var(--color-border-subtle)] space-y-4">
                 <AlertCircle size={64} className="mx-auto text-[var(--color-text-muted)] opacity-20" />
-                <p className="text-[var(--color-text-main)] text-xl font-bold font-display">No products found</p>
+                <p className="text-[var(--color-text-main)] text-xl font-bold font-display">{t('no_products_found')}</p>
               </div>
             ) : (
               filteredProducts.map((p) => {
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center opacity-40">
                           <ImageIcon size={48} className="text-[var(--color-text-muted)] mb-3" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">No Photo</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">{t('no_photo')}</span>
                         </div>
                       )}
                       <div className="absolute top-4 right-4 flex gap-2">
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setEditingProduct(p)}
                             className="p-3 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-xl hover:bg-[var(--color-primary)]/20 transition-all shadow-sm"
-                            title="Edit product"
+                            title={t('edit_product_btn')}
                           >
                             <Edit2 size={16} />
                           </motion.button>
@@ -282,7 +282,7 @@ export default function AdminDashboard() {
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleRemove(p.id, p.name)}
                             className="p-3 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-all shadow-sm"
-                            title="Delete product"
+                            title={t('delete_product_btn')}
                           >
                             <Trash2 size={16} />
                           </motion.button>
@@ -291,23 +291,23 @@ export default function AdminDashboard() {
                       
                       <div className="grid grid-cols-2 gap-3 mt-auto">
                         <div className="bg-[var(--color-card-bg)] p-3.5 rounded-2xl border border-[var(--color-border-subtle)]/50">
-                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Category</p>
+                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('category')}</p>
                           <p className="text-sm font-bold text-[var(--color-text-main)]">{getCategoryEmoji(p.category)} {p.category}</p>
                         </div>
                         <div className="bg-[var(--color-card-bg)] p-3.5 rounded-2xl border border-[var(--color-border-subtle)]/50">
-                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Quantity</p>
+                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('quantity')}</p>
                           <p className="text-lg font-black text-[var(--color-text-main)] leading-none">{p.quantity}</p>
                         </div>
                       </div>
 
                       <div className="flex justify-between items-center bg-[var(--color-card-bg)] p-4 rounded-2xl border border-[var(--color-border-subtle)]/50">
                         <div>
-                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Expires</p>
+                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('expires')}</p>
                           <p className="text-sm font-bold text-[var(--color-text-main)]">{formatDate(p.expiryDate)}</p>
-                          <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">{daysUntilExpiry > 0 ? `${daysUntilExpiry} days left` : 'Expired'}</p>
+                          <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">{daysUntilExpiry > 0 ? t('days_left', { count: daysUntilExpiry }) : t('expired')}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Added By</p>
+                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{t('added_by')}</p>
                           <p className="text-xs font-bold text-[var(--color-text-main)]">{p.addedBy || 'Unknown'}</p>
                         </div>
                       </div>
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
               className="bg-[var(--color-card-bg)] rounded-[2rem] p-6 max-w-md w-full shadow-2xl border border-[var(--color-border-subtle)]"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold font-display text-[var(--color-text-main)]">Edit Product</h3>
+                <h3 className="text-xl font-bold font-display text-[var(--color-text-main)]">{t('edit_product_modal')}</h3>
                 <button onClick={() => setEditingProduct(null)} className="p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-background-base)] rounded-full transition-colors">
                   <X size={20} />
                 </button>
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
               
               <form onSubmit={handleEditSave} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Name</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">{t('name_label')}</label>
                   <input 
                     type="text" 
                     value={editingProduct.name}
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Category</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">{t('category_label')}</label>
                   <select
                     value={editingProduct.category}
                     onChange={e => setEditingProduct({...editingProduct, category: e.target.value})}
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Quantity</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">{t('quantity_label')}</label>
                     <input 
                       type="number" 
                       min="1"
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Expiry Date</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-2">{t('expiry_date_label')}</label>
                     <input 
                       type="date" 
                       value={editingProduct.expiryDate}
@@ -393,10 +393,10 @@ export default function AdminDashboard() {
 
                 <div className="pt-4 flex gap-3">
                   <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-3 rounded-xl font-bold bg-[var(--color-background-base)] text-[var(--color-text-main)] hover:bg-[var(--color-border-subtle)] transition-colors">
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button type="submit" className="flex-1 py-3 rounded-xl font-bold bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity">
-                    Save Changes
+                    {t('save_changes')}
                   </button>
                 </div>
               </form>

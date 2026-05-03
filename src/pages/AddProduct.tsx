@@ -75,7 +75,7 @@ export default function AddProduct() {
       await addDoc(productsRef, newProduct);
       
       await addDoc(logsRef, {
-        action: 'Added product',
+        action: t('added_product'),
         details: `${user.username} added ${formData.quantity}x ${formData.name}`,
         timestamp: new Date().toISOString(),
         user: user.username
@@ -99,7 +99,7 @@ export default function AddProduct() {
           <Package size={32} className="text-[var(--color-primary)]" />
           {t('add_product')}
         </h2>
-        <p className="text-[var(--color-text-muted)] mt-2 font-medium">Add new items to your refrigerator inventory with images.</p>
+        <p className="text-[var(--color-text-muted)] mt-2 font-medium">{t('add_product_desc')}</p>
       </div>
 
       <motion.div 
@@ -111,7 +111,7 @@ export default function AddProduct() {
           {/* Image Upload Section */}
           <div className="space-y-4">
             <label className="text-sm font-bold text-[var(--color-text-main)]">
-              Product Image
+              {t('product_image')}
             </label>
             
             {imagePreview ? (
@@ -122,7 +122,7 @@ export default function AddProduct() {
               >
                 <img 
                   src={imagePreview} 
-                  alt="Product preview" 
+                  alt={t('product_preview')} 
                   className="w-full h-48 object-cover rounded-2xl border-2 border-[var(--color-border-subtle)]"
                 />
                 <motion.button
@@ -145,8 +145,8 @@ export default function AddProduct() {
                 />
                 <div className="border-2 border-dashed border-[var(--color-border-subtle)] rounded-2xl p-8 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-background-base)] transition-all">
                   <Upload className="mx-auto text-[var(--color-text-muted)] mb-3" size={32} />
-                  <p className="font-bold text-[var(--color-text-main)]">Click to upload product image</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1">PNG, JPG, WebP up to 5MB</p>
+                  <p className="font-bold text-[var(--color-text-main)]">{t('click_upload')}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('upload_types')}</p>
                 </div>
               </label>
             )}
@@ -163,7 +163,7 @@ export default function AddProduct() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Milk, Tomatoes, Chicken"
+                placeholder={t('product_placeholder')}
                 className="w-full px-4 py-3 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-background-base)] text-[var(--color-text-main)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
               />
             </div>

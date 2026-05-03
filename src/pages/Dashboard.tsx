@@ -48,7 +48,7 @@ export default function Dashboard() {
 
     try {
       await addDoc(logsRef, {
-        action: 'Removed product',
+        action: t('removed_product'),
         details: `${user.username} removed ${name}`,
         timestamp: new Date().toISOString(),
         user: user.username
@@ -79,7 +79,7 @@ export default function Dashboard() {
             <Search className="absolute left-3 top-2.5 text-zinc-400" size={18} />
             <input 
               type="text" 
-              placeholder={t('search_products')}
+              placeholder={t('search_placeholder')}
               className="w-full pl-10 pr-4 py-2 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--color-card-bg)] text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -111,7 +111,7 @@ export default function Dashboard() {
                   : "text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white"
               )}
             >
-              {filter === 'near_expiry' ? 'Showing Urgent' : t('quick_filter')}
+              {filter === 'near_expiry' ? t('showing_urgent') : t('quick_filter')}
             </button>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center opacity-40">
                         <ImageIcon size={48} className="text-[var(--color-text-muted)] mb-3" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">No Photo</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">{t('no_photo')}</span>
                       </div>
                     )}
                     <div className="absolute top-4 right-4 flex gap-2">
@@ -155,12 +155,12 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold text-[var(--color-text-main)] text-xl mb-1">{p.name}</p>
-                        <p className="text-[10px] text-[var(--color-text-muted)] font-black uppercase tracking-widest opacity-60">REF: {p.id.slice(0, 6).toUpperCase()}</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] font-black uppercase tracking-widest opacity-60">{t('ref')}: {p.id.slice(0, 6).toUpperCase()}</p>
                       </div>
                       <button 
                         onClick={() => handleRemove(p.id, p.name)}
                         className="p-3 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-xs md:opacity-0 md:group-hover:opacity-100 max-md:opacity-100"
-                        title="Remove product"
+                        title={t('remove_product')}
                       >
                         <Trash2 size={18} />
                       </button>

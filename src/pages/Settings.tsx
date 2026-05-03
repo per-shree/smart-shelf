@@ -37,12 +37,17 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editUsername, setEditUsername] = useState(user?.username || '');
+  const [editEmail, setEditEmail] = useState('');
 
   useEffect(() => {
     if (user?.username) {
       setEditUsername(user.username);
     }
-  }, [user]);
+    // Set initial email from fridge (for admin) or find member email
+    if (user?.role === 'Admin') {
+      setEditEmail(fridge?.adminEmail || '');
+    }
+  }, [user, fridge]);
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
@@ -54,17 +59,17 @@ export default function Settings() {
 
 
   const handleUpdateProfile = async () => {
-    if (!editUsername.trim() || editUsername === user?.username) {
+    if (!editUsername.trim()) {
       setIsEditingProfile(false);
       return;
     }
     try {
       if (updateUser) {
-        await updateUser(editUsername);
+        await updateUser(editUsername, editEmail);
       }
       setIsEditingProfile(false);
     } catch (error) {
-      alert("Failed to update profile");
+      alert(t('failed_update_profile'));
     }
   };
 
@@ -96,17 +101,17 @@ export default function Settings() {
             batch.set(newDocRef, item);
           });
           await batch.commit();
-          alert('Backup restored successfully!');
+          alert(t('backup_restored'));
         }
       } catch (err) {
-        alert('Invalid backup file');
+        alert(t('invalid_backup'));
       }
     };
     reader.readAsText(file);
   };
 
   const handleResetData = async () => {
-    if (!fridge || !window.confirm('Are you sure you want to reset all refrigerator data? This cannot be undone.')) return;
+    if (!fridge || !window.confirm(t('confirm_reset_data'))) return;
     try {
       const batch = writeBatch(db);
       
@@ -119,16 +124,16 @@ export default function Settings() {
       logsSnap.docs.forEach(d => batch.delete(d.ref));
       
       await batch.commit();
-      alert('Data reset successfully');
+      alert(t('data_reset_success'));
     } catch (err) {
-      alert('Failed to reset data');
+      alert(t('failed_reset_data'));
     }
   };
 
   const healthTips = [
-    { title: 'Temperature Control', tip: 'Keep the fridge at 4°C (40°F) or below.' },
-    { title: 'Ethylene Gases', tip: 'Keep ethylene-producing fruits away from veggies.' },
-    { title: 'First In, First Out', tip: 'Use older items first.' },
+    { title: t('temp_control'), tip: t('temp_control_tip') },
+    { title: t('ethylene_gases'), tip: t('ethylene_gases_tip') },
+    { title: t('fifo'), tip: t('fifo_tip') },
   ];
 
   const languages = [
@@ -142,7 +147,7 @@ export default function Settings() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black font-display text-[var(--color-text-main)] tracking-tight">{t('settings')}</h2>
-          <p className="text-[var(--color-text-muted)] mt-2 font-medium">Control your experience and manage household data.</p>
+          <p className="text-[var(--color-text-muted)] mt-2 font-medium">{t('settings_desc')}</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-card-bg)] rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
           <ShieldCheck size={16} className="text-green-500" />
@@ -164,7 +169,7 @@ export default function Settings() {
                   </div>
                   <div>
                     <h3 className="font-bold text-xl text-[var(--color-text-main)] font-display">{t('account_profile')}</h3>
-                    <p className="text-xs text-[var(--color-text-muted)] font-medium">Manage your personal presence in this fridge.</p>
+                    <p className="text-xs text-[var(--color-text-muted)] font-medium">{t('profile_desc')}</p>
                   </div>
                 </div>
                 {!isEditingProfile && (
@@ -193,6 +198,20 @@ export default function Settings() {
                     </div>
                   ) : (
                     <p className="text-lg font-bold text-[var(--color-text-main)]">{user?.username}</p>
+                  )}
+                </div>
+                <div className="space-y-2 p-5 bg-[var(--color-background-base)] rounded-2xl border border-[var(--color-border-subtle)]/50">
+                  <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">{t('email_address')}</p>
+                  {isEditingProfile ? (
+                    <input 
+                      type="email" 
+                      value={editEmail} 
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder={t('enter_email')}
+                      className="text-sm font-bold text-[var(--color-text-main)] bg-[var(--color-card-bg)] border border-[var(--color-border-subtle)] rounded-xl px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                    />
+                  ) : (
+                    <p className="text-lg font-bold text-[var(--color-text-main)] truncate">{editEmail || t('no_email_set')}</p>
                   )}
                 </div>
                 <div className="space-y-2 p-5 bg-[var(--color-background-base)] rounded-2xl border border-[var(--color-border-subtle)]/50">
@@ -227,7 +246,7 @@ export default function Settings() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[var(--color-text-main)]">{t('interface_language')}</p>
-                      <p className="text-xs text-[var(--color-text-muted)]">Select your preferred language.</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{t('lang_desc')}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -256,7 +275,7 @@ export default function Settings() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[var(--color-text-main)]">{t('appearance_mode')}</p>
-                      <p className="text-xs text-[var(--color-text-muted)]">Switch between light and dark themes.</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{t('appearance_desc')}</p>
                     </div>
                   </div>
                     <button 
@@ -288,7 +307,7 @@ export default function Settings() {
                 {t('data_control')}
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] font-medium leading-relaxed">
-                Export or import your refrigerator inventory as a portable JSON file.
+                {t('data_mgmt_desc')}
               </p>
               <div className="flex flex-col gap-3">
                 <button 
@@ -302,7 +321,7 @@ export default function Settings() {
                 </button>
                 <label className="w-full cursor-pointer flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-base)] hover:bg-[var(--color-border-subtle)] transition-colors text-[var(--color-text-main)]">
                   <Upload size={16} />
-                  <span className="uppercase text-[10px] font-black tracking-widest">Restore Backup</span>
+                  <span className="uppercase text-[10px] font-black tracking-widest">{t('restore_backup')}</span>
                   <input type="file" accept=".json" className="hidden" onChange={handleRestore} />
                 </label>
               </div>
@@ -329,8 +348,8 @@ export default function Settings() {
             </div>
             <div className="mt-8 pt-6 border-t border-white/10 relative">
                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest opacity-60">
-                 <span>Efficiency</span>
-                 <span>Optimal</span>
+                 <span>{t('efficiency')}</span>
+                 <span>{t('optimal')}</span>
                </div>
                <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                  <motion.div 
@@ -355,13 +374,13 @@ export default function Settings() {
               </div>
             </div>
             <div className="p-6 bg-gradient-to-br from-[var(--color-background-base)] to-[var(--color-card-bg)] rounded-3xl border border-[var(--color-border-subtle)]/50">
-              <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-center mb-4">Sustainability Score</p>
+              <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-center mb-4">{t('sustainability_score')}</p>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 space-y-1">
                    <div className="h-2 bg-[var(--color-background-base)] rounded-full overflow-hidden">
                     <div className="w-[85%] h-full bg-[#2E7D32]" />
                   </div>
-                  <p className="text-[8px] font-bold text-[#2E7D32] uppercase tracking-tighter">Excellent Status</p>
+                  <p className="text-[8px] font-bold text-[#2E7D32] uppercase tracking-tighter">{t('excellent_status')}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-black text-[var(--color-text-main)] font-display">A<span className="text-xs opacity-40">+</span></p>
@@ -378,7 +397,7 @@ export default function Settings() {
               </div>
               <div>
                 <h3 className="font-bold text-lg text-[var(--color-text-main)] font-display">{t('logout')}</h3>
-                <p className="text-xs text-[var(--color-text-muted)] font-medium">End your current session safely.</p>
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">{t('logout_desc')}</p>
               </div>
             </div>
             <button 
@@ -400,7 +419,7 @@ export default function Settings() {
                 <h3 className="font-bold text-lg text-red-900 dark:text-red-200 font-display">{t('danger_zone')}</h3>
               </div>
               <p className="text-xs text-red-800 dark:text-red-300 font-medium leading-relaxed opacity-70">
-                Irreversible actions related to your household data. Please proceed with extreme caution.
+                {t('danger_zone_desc')}
               </p>
               <button 
                 onClick={handleResetData}

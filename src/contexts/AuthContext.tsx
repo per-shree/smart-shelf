@@ -19,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
 import { hashPassword } from '../lib/utils';
+import { emailService } from '../services/emailService';
 
 
 
@@ -93,26 +94,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } else {
-        // Member logs in with: Member Username, Shelf Admin's Username, and Member Password
-        if (!shelfAdmin) throw new Error('Please provide the Admin Username for your shelf.');
+        // Member logs in with: Member Username and Member Password
+        // Search for all fridges that match this password (either as member password or admin password fallback)
+        const q1 = query(fridgesRef, where('memberPasswordHash', '==', hashedPassword));
+        const q2 = query(fridgesRef, where('passwordHash', '==', hashedPassword));
         
-        const q = query(fridgesRef, where('adminUsername', '==', shelfAdmin));
-        const snap = await getDocs(q);
-        
-        if (snap.empty) {
-          throw new Error('Shelf not found. Check the Admin Username.');
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const allPotentialFridges = [...snap1.docs, ...snap2.docs];
+
+        if (allPotentialFridges.length === 0) {
+          throw new Error('Incorrect password or shelf not found.');
+        }
+
+        // Now find the one where this user is actually a member
+        for (const fDoc of allPotentialFridges) {
+          const mRef = collection(db, `fridges/${fDoc.id}/members`);
+          const mq = query(mRef, where('username', '==', username));
+          const mSnap = await getDocs(mq);
+          
+          if (!mSnap.empty) {
+            currentFridge = { id: fDoc.id, ...fDoc.data() as Fridge };
+            break;
+          }
         }
         
-        const fridgeData = snap.docs[0].data() as Fridge;
-        const fridgeId = snap.docs[0].id;
-        
-        // Check password against memberPasswordHash (fallback to passwordHash if not set)
-        const targetHash = fridgeData.memberPasswordHash || fridgeData.passwordHash;
-        if (hashedPassword !== targetHash) {
-          throw new Error('Incorrect shelf password.');
+        if (!currentFridge) {
+          throw new Error('You are not a member of this shelf. Please contact your admin.');
         }
-        
-        currentFridge = { id: fridgeId, ...fridgeData };
       }
 
       if (!currentFridge) throw new Error('Authentication failed.');
@@ -146,6 +154,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setFridge(currentFridge);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('fridgeId', currentFridge.id);
+
+      // Send Login Alert to Admin & Member
+      console.log(`[Auth] User logged in: ${username} (${role}). Checking for alert emails...`);
+      
+      if (currentFridge.adminEmail) {
+        console.log(`[Auth] Sending alert to Admin: ${currentFridge.adminEmail}`);
+        emailService.sendLoginAlert(currentFridge.adminEmail, username, role);
+      } else {
+        console.warn(`[Auth] No Admin Email found for fridge ${currentFridge.id}`);
+      }
+
+      // If logging in as a member, check for their specific email
+      if (role === Role.Member) {
+        const mPath = `fridges/${currentFridge.id}/members`;
+        const mRef = collection(db, mPath);
+        const mq = query(mRef, where('username', '==', username));
+        const mSnap = await getDocs(mq);
+        if (!mSnap.empty) {
+          const mData = mSnap.docs[0].data() as Member;
+          if (mData.email) {
+            console.log(`[Auth] Sending alert to Member: ${mData.email}`);
+            emailService.sendLoginAlert(mData.email, username, role);
+          } else {
+            console.log(`[Auth] Member ${username} has no email registered.`);
+          }
+        }
+      }
     } catch (error: any) {
       console.error(error);
       throw error;
@@ -187,6 +222,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const [language, setLanguageState] = useState<string>(localStorage.getItem('lang') || 'en');
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = (lang: string) => {
     setLanguageState(lang);

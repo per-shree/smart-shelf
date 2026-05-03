@@ -114,8 +114,8 @@ function MemberLayout() {
       {/* Sidebar Navigation */}
       <nav className="hidden md:flex w-64 bg-[var(--color-card-bg)] border-r border-[var(--color-border-subtle)] flex-col">
         <div className="p-6 border-b border-[var(--color-border-subtle)]">
-          <h1 className="font-black text-2xl font-display text-[var(--color-primary)]">Smart Shelf</h1>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">Member Portal</p>
+          <h1 className="font-black text-2xl font-display text-[var(--color-primary)]">{t('app_name')}</h1>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('member_portal')}</p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -215,7 +215,7 @@ function AdminLayout() {
     },
     { 
       id: 'activity', 
-      label: 'Activity Logs', 
+      label: t('activity_logs'), 
       icon: BarChart3, 
       path: '/admin/activity',
     },
@@ -232,8 +232,8 @@ function AdminLayout() {
       {/* Sidebar Navigation */}
       <nav className="hidden md:flex w-64 bg-[var(--color-card-bg)] border-r border-[var(--color-border-subtle)] flex-col">
         <div className="p-6 border-b border-[var(--color-border-subtle)]">
-          <h1 className="font-black text-2xl font-display text-[var(--color-primary)]">Smart Shelf</h1>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">Admin Panel</p>
+          <h1 className="font-black text-2xl font-display text-[var(--color-primary)]">{t('app_name')}</h1>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('admin_panel')}</p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -261,7 +261,7 @@ function AdminLayout() {
 
         <div className="p-4 border-t border-[var(--color-border-subtle)] space-y-2">
           <div className="px-4 py-3 bg-[var(--color-background-base)] rounded-xl">
-            <p className="text-xs text-[var(--color-text-muted)] font-bold mb-1">LOGGED IN AS</p>
+            <p className="text-xs text-[var(--color-text-muted)] font-bold mb-1">{t('logged_in_as')}</p>
             <p className="text-sm font-black text-[var(--color-text-main)]">{user?.username}</p>
           </div>
           <button

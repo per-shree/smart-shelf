@@ -66,11 +66,12 @@ export default function AdminLoginPage() {
           setLoading(false);
           return;
         }
-        // OTP verified, complete login
-        await login(username, password, Role.Admin, email, true);
+        // OTP verified, complete login - passing undefined for shelfAdmin
+        await login(username, password, Role.Admin, undefined, email, true);
         navigate('/admin');
       } else {
-        const result = await login(username, password, Role.Admin, email, false);
+        // Initial login attempt - passing undefined for shelfAdmin
+        const result = await login(username, password, Role.Admin, undefined, email, false);
         if (result?.requiresOtp) {
           await generateAndSendOtp(result.email || email);
         } else {

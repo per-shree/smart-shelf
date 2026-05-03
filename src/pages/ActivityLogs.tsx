@@ -3,7 +3,8 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Clock, User, Info, AlertCircle } from 'lucide-react';
+import { Activity, Clock, User, Info, AlertCircle, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { formatDate } from '../lib/utils';
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
 
@@ -17,6 +18,7 @@ interface ActivityLog {
 
 export default function ActivityLogs() {
   const { fridge } = useAuth();
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,8 +48,8 @@ export default function ActivityLogs() {
           <Activity size={24} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold font-display text-[var(--color-text-main)]">Activity Logs</h2>
-          <p className="text-sm text-[var(--color-text-muted)] font-medium">Monitor all actions within your household</p>
+          <h2 className="text-2xl font-bold font-display text-[var(--color-text-main)]">{t('activity_logs')}</h2>
+          <p className="text-sm text-[var(--color-text-muted)] font-medium">{t('activity_logs_desc')}</p>
         </div>
       </div>
 
@@ -62,10 +64,10 @@ export default function ActivityLogs() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[var(--color-background-base)] text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] border-b border-[var(--color-border-subtle)]">
-                  <th className="px-8 py-5 font-black">Date & Time</th>
-                  <th className="px-8 py-5 font-black">User</th>
-                  <th className="px-8 py-5 font-black">Action</th>
-                  <th className="px-8 py-5 font-black">Details</th>
+                  <th className="px-8 py-5 font-black">{t('date_time')}</th>
+                  <th className="px-8 py-5 font-black">{t('user')}</th>
+                  <th className="px-8 py-5 font-black">{t('actions')}</th>
+                  <th className="px-8 py-5 font-black">{t('reason')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-subtle)]/50 text-sm">
@@ -74,7 +76,7 @@ export default function ActivityLogs() {
                     <tr>
                       <td colSpan={4} className="px-8 py-16 text-center">
                         <AlertCircle size={48} className="mx-auto text-[var(--color-text-muted)] mb-4 opacity-50" />
-                        <p className="text-[var(--color-text-muted)] text-lg font-medium">No activities recorded yet.</p>
+                        <p className="text-[var(--color-text-muted)] text-lg font-medium">{t('no_activity')}</p>
                       </td>
                     </tr>
                   ) : (

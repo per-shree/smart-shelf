@@ -10,8 +10,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-   const [username, setUsername] = useState('');
-  const [shelfAdmin, setShelfAdmin] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,10 +21,10 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await login(username, password, Role.Member, shelfAdmin);
+      await login(username, password, Role.Member);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || t('login_failed'));
     } finally {
       setLoading(false);
     }
@@ -48,7 +47,7 @@ export default function LoginPage() {
             {t('login_title')}
           </h1>
           <p className="text-[var(--color-text-muted)] mt-2 text-xs font-bold uppercase tracking-widest">
-            Shared Household Access
+            {t('shared_household_access')}
           </p>
         </div>
 
@@ -63,19 +62,6 @@ export default function LoginPage() {
                   placeholder={t('username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
-                  required
-                />
-            </div>
-            <div className="relative">
-              <Shield className="absolute left-4 top-4 text-[var(--color-text-muted)]" size={18} />
-                <input
-                  type="text"
-                  id="shelfAdmin"
-                  name="shelfAdmin"
-                  placeholder="Shelf Admin Username"
-                  value={shelfAdmin}
-                  onChange={(e) => setShelfAdmin(e.target.value)}
                   className="w-full pl-12 pr-6 py-4 rounded-2xl border border-[var(--color-border-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/5 focus:border-[var(--color-primary)] transition-all bg-[var(--color-card-bg)] text-[var(--color-text-main)] font-medium text-sm shadow-xs"
                   required
                 />
@@ -109,7 +95,7 @@ export default function LoginPage() {
           </button>
 
           <p className="text-zinc-400 text-[10px] text-center leading-relaxed">
-            Enter the shared fridge password provided by your admin.
+            {t('enter_shared_fridge_password')}
           </p>
 
           <div className="mt-8 text-center pt-6 border-t border-[var(--color-border-subtle)]">
@@ -118,7 +104,7 @@ export default function LoginPage() {
               onClick={() => navigate('/admin/login')} 
               className="text-[10px] text-[var(--color-primary)] font-bold uppercase tracking-widest hover:underline"
             >
-              Admin Login / Setup New Fridge
+              {t('admin_login_setup')}
             </button>
           </div>
         </form>

@@ -26,6 +26,7 @@ export interface Member {
   id: string;
   fridgeId: string;
   username: string;
+  email?: string;
   role: Role;
   joinedAt: string;
 }
