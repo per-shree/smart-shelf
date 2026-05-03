@@ -9,7 +9,7 @@ import { cn } from '../lib/utils';
 import { emailService } from '../services/emailService';
 
 export default function AdminLoginPage() {
-  const { login } = useAuth();
+  const { login, setIsGlobalLoading } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -68,6 +68,7 @@ export default function AdminLoginPage() {
         }
         // OTP verified, complete login - passing undefined for shelfAdmin
         await login(username, password, Role.Admin, undefined, email, true);
+        setIsGlobalLoading(true);
         navigate('/admin');
       } else {
         // Initial login attempt - passing undefined for shelfAdmin
@@ -75,6 +76,7 @@ export default function AdminLoginPage() {
         if (result?.requiresOtp) {
           await generateAndSendOtp(result.email || email);
         } else {
+          setIsGlobalLoading(true);
           navigate('/admin');
         }
       }

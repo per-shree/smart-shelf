@@ -16,10 +16,16 @@ import { cn } from './lib/utils';
 import { Home, Plus, Sparkles, ShoppingCart, Users, Settings as SettingsIcon, LogOut, BarChart3 } from 'lucide-react';
 
 import AdminDashboard from './pages/AdminDashboard';
+import Loader from './components/Loader';
 
 export default function App() {
-  const { user, language } = useAuth();
+  const { user, language, isGlobalLoading, setIsGlobalLoading } = useAuth();
   const { i18n } = useTranslation();
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsGlobalLoading(true);
+  }, [location.pathname]);
 
   useEffect(() => {
     i18n.changeLanguage(language);
@@ -38,7 +44,9 @@ export default function App() {
   const isAdmin = user?.role === Role.Admin;
 
   return (
-    <Routes>
+    <>
+      {isGlobalLoading && <Loader />}
+      <Routes>
       <Route path="/language" element={<LanguagePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -71,7 +79,8 @@ export default function App() {
       )}
 
       <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/"} />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

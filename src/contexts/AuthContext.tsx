@@ -13,6 +13,8 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (newUsername: string) => Promise<void>;
   isLoading: boolean;
+  setIsGlobalLoading: (loading: boolean) => void;
+  isGlobalLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +29,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<{ username: string; role: Role } | null>(null);
   const [fridge, setFridge] = useState<Fridge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+
+  const triggerGlobalLoader = () => {
+    setIsGlobalLoading(true);
+    setTimeout(() => setIsGlobalLoading(false), 4000);
+  };
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -234,7 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, fridge, language, setLanguage, login, logout, updateUser, isLoading }}>
+    <AuthContext.Provider value={{ user, fridge, language, setLanguage, login, logout, updateUser, isLoading, isGlobalLoading, setIsGlobalLoading: triggerGlobalLoader }}>
       {children}
     </AuthContext.Provider>
   );

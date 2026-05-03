@@ -7,7 +7,7 @@ import { Shield, User, Lock, Loader2 } from 'lucide-react';
 import { Role } from '../types';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, setIsGlobalLoading } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -22,6 +22,7 @@ export default function LoginPage() {
     setError('');
     try {
       await login(username, password, Role.Member);
+      setIsGlobalLoading(true);
       navigate('/');
     } catch (err: any) {
       setError(err.message || t('login_failed'));
