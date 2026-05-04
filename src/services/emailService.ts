@@ -35,7 +35,6 @@ export const emailService = {
           code: otp,
           from_name: "Smart Shelf Security",
           title: "Verification Code",
-          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
           message: "Please use the code below to verify your admin account."
         }
       );
@@ -77,7 +76,6 @@ export const emailService = {
           user_email: targetEmail,
           from_name: "Smart Shelf Security",
           title: "Security Alert",
-          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
           login_user: loginUser,
           role: role,
           time: new Date().toLocaleString(),
@@ -114,7 +112,6 @@ export const emailService = {
           to_email: targetEmail,
           from_name: "Smart Shelf Team",
           title: "Invitation to Join Smart Shelf",
-          logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
           message: `Invitation from ${adminName}: You've been invited to join their Smart Shelf. Create your account to start managing products together!`
         }
       );
