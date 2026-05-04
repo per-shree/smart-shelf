@@ -129,11 +129,6 @@ export default function AdminDashboard() {
                   </p>
                   
                   {fridge && (
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
-                      <div className="bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 px-4 py-2.5 rounded-xl flex items-center gap-3 shadow-sm">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] opacity-70">Shelf Code</span>
-                        <span className="text-sm font-black font-mono text-[var(--color-text-main)] tracking-wider select-all bg-white/50 px-2 py-0.5 rounded border border-[var(--color-primary)]/10">{fridge.shelfCode}</span>
-                      </div>
                       <motion.button 
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -143,7 +138,6 @@ export default function AdminDashboard() {
                         <UserPlus size={14} />
                         Invite Member
                       </motion.button>
-                    </div>
                   )}
                 </div>
               </div>
@@ -468,13 +462,8 @@ export default function AdminDashboard() {
 
               <div className="space-y-6">
                 <p className="text-sm text-[var(--color-text-muted)] font-medium leading-relaxed">
-                  Send an email invitation to your household members. They will receive the <span className="text-[var(--color-primary)] font-bold">Shelf Code</span> needed to join this shelf.
+                  Send an email invitation to your household members to join this shelf.
                 </p>
-
-                <div className="bg-[var(--color-background-base)] p-5 rounded-2xl border border-[var(--color-border-subtle)] space-y-2">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Your Shelf Code</p>
-                  <p className="text-2xl font-black font-mono tracking-widest text-[var(--color-primary)]">{fridge?.shelfCode}</p>
-                </div>
 
                 <div className="space-y-3">
                   <label className="block text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)] ml-1">Member Email Address</label>
@@ -502,7 +491,7 @@ export default function AdminDashboard() {
                       if (!inviteEmail || !fridge || !user) return;
                       setIsInviting(true);
                       try {
-                        await emailService.sendInvitation(inviteEmail, fridge.shelfCode, user.username);
+                        await emailService.sendInvitation(inviteEmail, user.username);
                         alert(`Invitation sent to ${inviteEmail}`);
                         setIsInviteModalOpen(false);
                         setInviteEmail('');

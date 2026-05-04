@@ -93,12 +93,12 @@ export const emailService = {
   /**
    * Sends a shelf invitation to a new member.
    */
-  sendInvitation: async (targetEmail: string, shelfCode: string, adminName: string): Promise<boolean> => {
+  sendInvitation: async (targetEmail: string, adminName: string): Promise<boolean> => {
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID; // Reusing the OTP template
+    const templateId = import.meta.env.VITE_EMAILJS_INVITE_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID; 
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-    console.log(`[EmailService] Reusing OTP template for invitation to ${targetEmail}`);
+    console.log(`[EmailService] Sending invitation to ${targetEmail}`);
 
     if (!serviceId || serviceId === 'your_service_id') {
       console.warn('[EmailService] EmailJS not configured.');
@@ -112,13 +112,10 @@ export const emailService = {
         templateId,
         {
           to_email: targetEmail,
-          // We map 'shelfCode' to 'otp_code' and 'code' so your existing OTP template displays it
-          otp_code: shelfCode,
-          code: shelfCode,
           from_name: "Smart Shelf Team",
-          title: "Shelf Access Code",
+          title: "Invitation to Join Smart Shelf",
           logo_url: "https://firebasestorage.googleapis.com/v0/b/smart-shelf-5d57a.firebasestorage.app/o/logo.png?alt=media&token=752b8b46-9d63-4353-8a78-dce45738c7a8",
-          message: `Invitation from ${adminName}: Use the code above to join their Smart Shelf household. Click the button below to register.`
+          message: `Invitation from ${adminName}: You've been invited to join their Smart Shelf. Create your account to start managing products together!`
         }
       );
       return true;

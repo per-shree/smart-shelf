@@ -48,7 +48,6 @@ export interface Fridge {
   memberPasswordHash?: string; // New field for members
   adminUsername: string;
   adminEmail?: string;
-  shelfCode: string;
   createdAt: string;
 }
 

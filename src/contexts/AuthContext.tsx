@@ -10,7 +10,7 @@ interface AuthContextType {
   language: string;
   setLanguage: (lang: string) => void;
   login: (username: string, password: string, role: Role, email?: string, isOtpVerified?: boolean) => Promise<{ requiresOtp: boolean, email?: string } | void>;
-  registerMember: (username: string, password: string, shelfCode: string, email: string) => Promise<void>;
+  registerMember: (username: string, password: string, email: string) => Promise<void>;
   logout: () => void;
   updateUser: (newUsername: string, newEmail: string) => Promise<void>;
   isLoading: boolean;
@@ -21,7 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 import { OperationType, handleFirestoreError } from '../lib/firestoreUtils';
-import { hashPassword, generateShelfCode } from '../lib/utils';
+import { hashPassword } from '../lib/utils';
 import { emailService } from '../services/emailService';
 import { activityService, ActivityAction } from '../services/activityService';
 
@@ -51,14 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         onSnapshot(fridgeRef, async (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data() as Fridge;
-            // Self-healing for old fridges missing a shelf code
-            if (!data.shelfCode) {
-              const newCode = generateShelfCode();
-              await updateDoc(fridgeRef, { shelfCode: newCode });
-              setFridge({ id: docSnap.id, ...data, shelfCode: newCode });
-            } else {
-              setFridge({ id: docSnap.id, ...data });
-            }
+            setFridge({ id: docSnap.id, ...data });
           }
           setIsLoading(false);
         }, (error) => {
@@ -94,7 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               memberPasswordHash: hashedPassword, // Default member password same as admin for new setup
               adminUsername: username,
               adminEmail: email,
-              shelfCode: generateShelfCode(),
               createdAt: new Date().toISOString(),
             };
             const docRef = await addDoc(fridgesRef, newFridge);
@@ -110,12 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const data = fridgeDoc.data() as Fridge;
           currentFridge = { id: fridgeDoc.id, ...data };
           
-          // Self-healing for existing fridges
-          if (!currentFridge.shelfCode) {
-            const newCode = generateShelfCode();
-            await updateDoc(fridgeDoc.ref, { shelfCode: newCode });
-            currentFridge.shelfCode = newCode;
-          }
           
           if (!isOtpVerified) {
             return { requiresOtp: true, email: currentFridge.adminEmail };
@@ -223,18 +209,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const registerMember = async (username: string, password: string, shelfCode: string, email: string) => {
+  const registerMember = async (username: string, password: string, email: string) => {
     setIsLoading(true);
     try {
       const hashedPassword = await hashPassword(password);
       const fridgesRef = collection(db, 'fridges');
       
-      // Find the fridge by shelf code
-      const q = query(fridgesRef, where('shelfCode', '==', shelfCode));
-      const fridgeSnap = await getDocs(q);
+      // Find the first available fridge (assuming single-tenant or default household)
+      const fridgeSnap = await getDocs(fridgesRef);
       
       if (fridgeSnap.empty) {
-        throw new Error('Invalid Shelf Code. Please ask your admin for the correct code.');
+        throw new Error('No shelf found. Please set up an admin account first.');
       }
       
       const fridgeDoc = fridgeSnap.docs[0];
